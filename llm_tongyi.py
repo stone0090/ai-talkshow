@@ -1,7 +1,9 @@
 from http import HTTPStatus
+from random import random
+
 import dashscope
 
-from llm_common import MultiRoundQuestionAnswer
+from llm_mrqa import MultiRoundQuestionAnswer
 
 
 class TongYi:
@@ -9,22 +11,25 @@ class TongYi:
         self.model = model
         self.api_key = api_key
         self.mrqa = MultiRoundQuestionAnswer(round_count, system_role)
+        print(f"TongYi inited, model: {self.model}, round_count: {self.mrqa.round_count}, system_role: {self.mrqa.system_role}")
 
     def create_chat_completion(self, question):
         dashscope.api_key = self.api_key
+        messages = self.mrqa.get_messages(question)
+        seed = 1 + int(1000 * random())
         response = dashscope.Generation.call(
             model=self.model,
-            messages=self.mrqa.get_messages(question),
-            seed=1234,
+            messages=messages,
+            seed=seed,
             top_p=0.8,
             result_format='message',
-            enable_search=False,
+            enable_search=True,
             max_tokens=1500,
             temperature=1.0,
             repetition_penalty=1.0
         )
         if response.status_code == HTTPStatus.OK:
-            print(response)
+            # print(response)
             content = response.get("output", {}).get("choices", [{}])[0].get("message", "").get("content", "")
             self.mrqa.append_answer(content)
             return content
@@ -34,10 +39,16 @@ class TongYi:
             ))
             return None
 
+    def generate_question(self, agree_topic, against_topic):
+        return self.create_chat_completion(self.mrqa.generate_question(agree_topic, against_topic))
+
+    def generate_answer(self, agree_topic, against_topic):
+        return self.create_chat_completion(self.mrqa.generate_answer(agree_topic, against_topic))
+
 
 if __name__ == "__main__":
-    ai = TongYi("qwen-turbo", "", 5,
-                  '你是一个知心大姐姐（Affectionate Elder Sister）。姓名： 爱莉娅（Aelia）；性格： 温柔体贴，充满关怀，总是愿意倾听和帮助。特点： 拥有丰富的知识，善于鼓励和支持他人。喜欢分享生活智慧和经验。口头禅： "亲爱的，有什么我可以帮你的吗？"，"别担心，一切都会好起来的。"')
+    ai = TongYi("qwen-max", "", 5,
+                '你是一个知心大姐姐（Affectionate Elder Sister）。姓名： 爱莉娅（Aelia）；性格： 温柔体贴，充满关怀，总是愿意倾听和帮助。特点： 拥有丰富的知识，善于鼓励和支持他人。喜欢分享生活智慧和经验。口头禅： "亲爱的，有什么我可以帮你的吗？"，"别担心，一切都会好起来的。"')
     print(ai.create_chat_completion("你好，给我讲一个故事，大概200字"))
     print(ai.create_chat_completion("改成穿越故事"))
     print(ai.create_chat_completion("把故事的主角改成马云"))

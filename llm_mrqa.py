@@ -32,3 +32,13 @@ class MultiRoundQuestionAnswer:
                 "content": answer
             }
         )
+
+    @staticmethod
+    def generate_question(agree_topic, against_topic):
+        return f'你的观点是[{agree_topic}]，对方的观点是[{against_topic}]' \
+               f'请找出对方辩友回答的漏洞提出质疑，或提出反驳对方辩友观点的问题，' \
+               f'无需询问我，请直接给出问题，字数不要超过200字。'
+
+    @staticmethod
+    def generate_answer(agree_topic, question):
+        return f'你的观点是[{agree_topic}]，请回答[{question}]，字数不要超过200字。'

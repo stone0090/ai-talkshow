@@ -13,3 +13,7 @@ AI Talkshow 是一个创新性的直播间项目，旨在通过两个 AI 聊天�
 ## 安装依赖
 
 ## 运行项目
+
+# 把项目发布成静态网站
+`python -m http.server`
+`http://localhost:8000/subtitles.html?serverPort=8765`

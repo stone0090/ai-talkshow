@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtitle Viewer</title>
+</head>
+<body>
+
+<div id="subtitleContainer"></div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const serverPort = urlParams.get('serverPort');
+    console.log('Server port: ' + serverPort);
+    const subtitleContainer = document.getElementById('subtitleContainer');
+    const socket = new WebSocket('ws://localhost:' + serverPort);
+    socket.onmessage = function (event) {
+        const subtitleText = event.data;
+        subtitleContainer.innerText = subtitleText;
+    };
+    socket.onclose = function (event) {
+        if (event.wasClean) {
+            console.log(`Closed cleanly, code=${event.code}, reason=${event.reason}`);
+        } else {
+            console.error('Connection died');
+        }
+    };
+    socket.onerror = function (error) {
+        console.error(`Error: ${error.message}`);
+    };
+</script>
+
+</body>
+</html>

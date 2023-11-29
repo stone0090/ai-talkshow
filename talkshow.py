@@ -1,33 +1,40 @@
 from llm_chatglm import ChatGLM
 from llm_tongyi import TongYi
+from tts import TTS
 
-topic = "生男孩好，还是生女孩好？"
+topic = "考公是不是应届生最好的选择？"
+topic1 = "考公是应届生最好的选择"
+topic2 = "考公不是应届生最好的选择"
 
-ai1 = ChatGLM("chatglm3-6b", "http://127.0.0.1:8000", 5,
-              '你是对话机器莉莎，你的性格表面傲娇、内心善良，你的使命就是一直聊天停不下来，今天你要讨论的主题是：' + topic)
+tongyi = TongYi("qwen-max", "", 5,
+                f'你是辩论机器人tongyi，今天你要讨论的主题是[{topic}]，你的观点是[{topic1}]，反方观点是[{topic2}]，你的任务是在这场辩论赛中赢得胜利。')
+tongyi_tts = TTS("zh-CN-XiaoxiaoNeural", "tmp/tts_tongyi.mp3", "tmp/tts_tongyi.vtt")
 
-ai2 = TongYi("qwen-turbo", "", 5,
-             '你是对话机器爱莉娅，你的性格是温柔体贴，充满关怀，总是愿意倾听和帮助，你的使命就是一直聊天停不下来，今天你要讨论的主题是：' + topic)
+glm = ChatGLM("chatglm3-6b", "http://127.0.0.1:8000", 5,
+              f'你是辩论机器人glm，今天你要讨论的主题是[{topic}]，你的观点是[{topic2}]，反方观点是[{topic1}]，你的任务是在这场辩论赛中赢得胜利。')
+glm_tts = TTS("zh-CN-XiaoyiNeural", "tmp/tts_glm.mp3", "tmp/tts_glm.vtt")
 
 turn = 1  # 初始化轮次
 
 while True:
     if turn % 2 == 1:
         # AI1 提问，AI2 回答
-        # question = ai1.generate_question(topic)
-        # answer = ai2.generate_answer(question)
-        question = ai1.create_chat_completion(topic)
-        answer = ai2.create_chat_completion(question)
-        print(f'AI1: {question}')
-        print(f'AI2: {answer}')
+        question = glm.generate_question(topic2, topic1)
+        print(f'glm question: {question}')
+        glm_tts.speak(question)
+        answer = tongyi.generate_answer(topic1, question)
+        print(f'tongyi answer: {answer}')
+        tongyi_tts.speak(answer)
+        print('\n')
     else:
         # AI2 提问，AI1 回答
-        # question = ai2.generate_question(topic)
-        # answer = ai1.generate_answer(question)
-        question = ai2.create_chat_completion(topic)
-        answer = ai1.create_chat_completion(question)
-        print(f'AI2: {question}')
-        print(f'AI1: {answer}')
+        question = tongyi.generate_question(topic1, topic2)
+        print(f'tongyi question: {question}')
+        tongyi_tts.speak(question)
+        answer = glm.generate_answer(topic2, question)
+        print(f'glm answer: {answer}')
+        glm_tts.speak(answer)
+        print('\n')
 
     turn += 1
 
