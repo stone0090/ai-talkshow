@@ -6,8 +6,28 @@
     <title>Subtitle Viewer</title>
 </head>
 <body>
-
-<div id="subtitleContainer"></div>
+<style>
+    .bubble {
+        background-color: rgba(255, 255, 255, 0.8); /* 设置背景色为半透明白色 */
+        border-radius: 10px; /* 设置圆角 */
+        padding: 10px; /* 设置内边距 */
+        margin: 10px 0; /* 设置上下外边距 */
+        overflow: hidden; /* 隐藏超出部分的内容 */
+        border: 2px solid #fbd1b8; /* 设置边框为红色 */
+        color: green; /* 设置文字颜色为绿色 */
+        position: relative; /* 设置相对定位，以便定位箭头 */
+    }
+    .bubble::before {
+        content: ''; /* 添加伪元素内容 */
+        position: absolute; /* 设置绝对定位，相对于.bubble来定位 */
+        top: 50%; /* 在垂直方向上居中 */
+        left: -10px; /* 调整箭头相对于.bubble的位置 */
+        border-width: 10px 0 10px 10px; /* 定义箭头的形状 */
+        border-style: solid; /* 设置边框样式 */
+        border-color: transparent transparent transparent #fbd1b8; /* 设置箭头颜色 */
+    }
+</style>
+<div id="subtitleContainer" class="bubble"></div>
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);

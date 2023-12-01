@@ -1,7 +1,7 @@
 import requests
 import json
 
-from llm_mrqa import MultiRoundQuestionAnswer
+from ai.utils import MultiRoundQuestionAnswer
 
 
 class ChatGLM:
@@ -10,7 +10,8 @@ class ChatGLM:
         self.model = model
         self.base_url = base_url
         self.mrqa = MultiRoundQuestionAnswer(round_count, system_role)
-        print(f"ChatGLM inited, model: {self.model}, round_count: {self.mrqa.round_count}, system_role: {self.mrqa.system_role}")
+        print(
+            f"ChatGLM inited, model: {self.model}, round_count: {self.mrqa.round_count}, system_role: {self.mrqa.system_role}")
 
     def create_chat_completion(self, question, use_stream=False):
         messages = self.mrqa.get_messages(question)
@@ -46,11 +47,11 @@ class ChatGLM:
             print("Error:", response.status_code)
             return None
 
-    def generate_question(self, agree_topic, against_topic):
-        return self.create_chat_completion(self.mrqa.generate_question(agree_topic, against_topic))
+    def generate_question(self, message):
+        return self.create_chat_completion(message)
 
-    def generate_answer(self, agree_topic, question):
-        return self.create_chat_completion(self.mrqa.generate_answer(agree_topic, question))
+    def generate_answer(self, message):
+        return self.create_chat_completion(message)
 
 
 if __name__ == "__main__":

@@ -8,14 +8,7 @@ import aiohttp
 
 import blivedm
 import blivedm.models.web as web_models
-
-# 直播间ID的取值看直播间URL
-TEST_ROOM_IDS = [
-    23679394
-]
-
-# 这里填一个已登录账号的cookie。不填cookie也可以连接，但是收到弹幕的用户名会打码，UID会变成0
-SESSDATA = ''
+from config import BILIBILI_LIVE_ROOM_IDS, BILIBILI_SESSION
 
 session: Optional[aiohttp.ClientSession] = None
 
@@ -31,7 +24,7 @@ async def main():
 
 def init_session():
     cookies = http.cookies.SimpleCookie()
-    cookies['SESSDATA'] = SESSDATA
+    cookies['SESSDATA'] = BILIBILI_SESSION
     cookies['SESSDATA']['domain'] = 'bilibili.com'
 
     global session
@@ -43,7 +36,7 @@ async def run_single_client():
     """
     演示监听一个直播间
     """
-    room_id = random.choice(TEST_ROOM_IDS)
+    room_id = random.choice(BILIBILI_LIVE_ROOM_IDS)
     client = blivedm.BLiveClient(room_id, session=session)
     handler = MyHandler()
     client.set_handler(handler)
@@ -63,7 +56,7 @@ async def run_multi_clients():
     """
     演示同时监听多个直播间
     """
-    clients = [blivedm.BLiveClient(room_id, session=session) for room_id in TEST_ROOM_IDS]
+    clients = [blivedm.BLiveClient(room_id, session=session) for room_id in BILIBILI_LIVE_ROOM_IDS]
     handler = MyHandler()
     for client in clients:
         client.set_handler(handler)
