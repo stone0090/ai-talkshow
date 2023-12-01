@@ -31,7 +31,7 @@ https://dashscope.aliyun.com/
 ## 运行项目
 
 根据实际情况调整配置文件`config.py`。
-f
+
 ### 启动B站弹幕监听服务（待开发）
 `python blivedm/server.py`
 
