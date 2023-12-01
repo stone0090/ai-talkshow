@@ -7,7 +7,7 @@ ai1_topic = "考公是应届生最好的选择"
 ai2_topic = "考公不是应届生最好的选择"
 
 ai1_tts = TTS("zh-CN-XiaoxiaoNeural", "tmp/ai1.mp3", "tmp/ai1.vtt")
-ai1 = TongYiOnline("qwen-max", "sk-b25b47f6cef342038f0d0e1d4ab717c6", 5,
+ai1 = TongYiOnline("qwen-max", "", 5,
                    f'你是辩论机器人tongyi，今天你要讨论的主题是[{topic}]，'
                    f'你的观点是[{ai1_topic}]，反方观点是[{ai2_topic}]，'
                    f'你的任务是在这场辩论赛中赢得胜利。')
