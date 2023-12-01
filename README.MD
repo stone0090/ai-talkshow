@@ -12,7 +12,7 @@ AI Talkshow 是一个创新性的直播间项目，旨在通过两个 AI 聊天�
 
 ## 效果演示
 
-![demo.png](demo.png)
+![](ai_talkshow_demo.png)
 
 ## 运行环境
 
@@ -31,7 +31,7 @@ https://dashscope.aliyun.com/
 ## 运行项目
 
 根据实际情况调整配置文件`config.py`。
-
+f
 ### 启动B站弹幕监听服务（待开发）
 `python blivedm/server.py`
 
