@@ -7,19 +7,20 @@
 import requests
 import json
 
-base_url = "http://127.0.0.1:8000" # 本地部署的地址,或者使用你访问模型的API地址
+from config import CHAT_GLM_SERVER_URL
+
 
 def create_chat_completion(model, messages, use_stream=False):
     data = {
-        "model": model, # 模型名称
-        "messages": messages, # 会话历史
-        "stream": use_stream, # 是否流式响应
-        "max_tokens": 100, # 最多生成字数
-        "temperature": 0.8, # 温度
-        "top_p": 0.8, # 采样概率
+        "model": model,  # 模型名称
+        "messages": messages,  # 会话历史
+        "stream": use_stream,  # 是否流式响应
+        "max_tokens": 100,  # 最多生成字数
+        "temperature": 0.8,  # 温度
+        "top_p": 0.8,  # 采样概率
     }
 
-    response = requests.post(f"{base_url}/v1/chat/completions", json=data, stream=use_stream)
+    response = requests.post(f"{CHAT_GLM_SERVER_URL}/v1/chat/completions", json=data, stream=use_stream)
     if response.status_code == 200:
         if use_stream:
             # 处理流式响应
@@ -55,5 +56,3 @@ if __name__ == "__main__":
         }
     ]
     create_chat_completion("chatglm3-6b", chat_messages, use_stream=False)
-
-
