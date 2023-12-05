@@ -17,21 +17,29 @@ AI Talkshow 是一个创新性的直播间项目，旨在通过两个 AI
 
 ## 运行环境
 
-### 下载ChatGLM3-6B模型
+### 安装 python（建议3.8.10或以上）
 
-https://modelscope.cn/models/ZhipuAI/chatglm3-6b/summary
+https://www.python.org/downloads/release/python-3810/
 
-### 申请通义千问服务的api_key
-
-https://dashscope.aliyun.com/
-
-### 安装依赖
+### 安装 python 依赖库
 
 `pip install -r requirements.txt`
 
-### 测试tts服务
+### 下载 ChatGLM3-6B 模型
+
+https://modelscope.cn/models/ZhipuAI/chatglm3-6b/summary
+
+### 申请通义千问在线服务 api_key
+
+https://dashscope.aliyun.com/
+
+### 测试 tts 文字转语音在线服务
 
 `python tts.py`
+
+### 安装 VTubeStudio
+
+https://denchisoft.com/
 
 ## 运行项目
 
@@ -51,13 +59,13 @@ https://dashscope.aliyun.com/
 
 ### 运行字幕服务器（依赖项目发布成静态网站）
 
-`python subtitle.py -path tmp/ai1.vtt -port 8765`
-`http://localhost:8000/subtitle.html?serverPort=8765`
+`python common/subtitle.py -path tmp/ai1.vtt -port 8765`
+`http://localhost:8000/common/subtitle.html?serverPort=8765`
 
 ### 运行字幕服务器（依赖项目发布成静态网站）
 
-`python subtitle.py -path tmp/ai2.vtt -port 8766`
-`http://localhost:8000/subtitle.html?serverPort=8766`
+`python common/subtitle.py -path tmp/ai2.vtt -port 8766`
+`http://localhost:8000/common/subtitle.html?serverPort=8766`
 
 ### 启动AI聊天服务
 

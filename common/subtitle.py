@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import json
+import os
 
 import websockets
 import re
@@ -27,7 +28,7 @@ class Subtitle:
     async def watch(self, websocket):
         event_handler = SubtitleFileHandler(websocket, self.file_path)
         observer = Observer()
-        observer.schedule(event_handler, path='tmp', recursive=False)
+        observer.schedule(event_handler, path=os.path.dirname(self.file_path), recursive=False)
         observer.start()
         try:
             while True:
@@ -91,6 +92,8 @@ async def parse_subtitle(file_path):
     subtitles = []
     with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
+        if len(lines) <= 0:
+            return subtitles
         first_line = lines[0].strip()
         if not re.match(r'WEBVTT', first_line):
             return subtitles
@@ -130,6 +133,8 @@ async def parse_send_class(websocket, file_path):
     class_name = ''
     with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
+        if len(lines) <= 0:
+            return class_name
         first_line = lines[0].strip()
         if not re.match(r'CLASS', first_line):
             return class_name
@@ -144,7 +149,7 @@ if __name__ == "__main__":
     parser.add_argument('-path', type=str, help='Specify the file path', required=True)
     parser.add_argument('-port', type=int, help='Specify the server port', required=True)
     args = parser.parse_args()
-    path = args.path
+    path = os.path.abspath(args.path)
     port = args.port
     service = Subtitle(path, port)
     service.start()

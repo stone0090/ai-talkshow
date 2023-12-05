@@ -1,57 +1,29 @@
 import requests
-import json
 
-from ai.utils import MultiRoundQuestionAnswer
+from ai.ai_basic import AiBasic
 
 
-class ChatGLM:
+class ChatGLM(AiBasic):
 
-    def __init__(self, model, base_url, round_count, system_role):
-        self.model = model
-        self.base_url = base_url
-        self.mrqa = MultiRoundQuestionAnswer(round_count, system_role)
-        print(
-            f"ChatGLM inited, model: {self.model}, round_count: {self.mrqa.round_count}, system_role: {self.mrqa.system_role}")
-
-    def create_chat_completion(self, question, use_stream=False):
+    def create_chat_completion(self, question):
         messages = self.mrqa.get_messages(question)
         data = {
             "model": self.model,  # 模型名称
             "messages": messages,  # 会话历史
-            "stream": use_stream,  # 是否流式响应
+            "stream": False,  # 是否流式响应
             "max_tokens": 1500,  # 最多生成字数
             "temperature": 0.8,  # 温度
             "top_p": 0.8,  # 采样概率
         }
-        response = requests.post(f"{self.base_url}/v1/chat/completions", json=data, stream=use_stream)
+        response = requests.post(f"{self.api_key}/v1/chat/completions", json=data, stream=False)
         if response.status_code == 200:
-            if use_stream:
-                # 处理流式响应
-                for line in response.iter_lines():
-                    if line:
-                        decoded_line = line.decode('utf-8')[6:]
-                        try:
-                            response_json = json.loads(decoded_line)
-                            content = response_json.get("choices", [{}])[0].get("delta", {}).get("content", "")
-                            print(content)
-                        except:
-                            print("Special Token:", decoded_line)
-            else:
-                # 处理非流式响应
-                decoded_line = response.json()
-                # print(decoded_line)
-                content = decoded_line.get("choices", [{}])[0].get("message", "").get("content", "")
-                self.mrqa.append_answer(content)
-                return content
+            decoded_line = response.json()
+            content = decoded_line.get("choices", [{}])[0].get("message", "").get("content", "")
+            self.mrqa.append_answer(content)
+            return content
         else:
             print("Error:", response.status_code)
             return None
-
-    def generate_question(self, message):
-        return self.create_chat_completion(message)
-
-    def generate_answer(self, message):
-        return self.create_chat_completion(message)
 
 
 if __name__ == "__main__":
