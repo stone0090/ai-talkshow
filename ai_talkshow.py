@@ -7,17 +7,17 @@ topic = "考公是应届生最好的选择吗？"
 ai1_topic = "考公是应届生最好的选择！"
 ai2_topic = "考公不是应届生最好的选择！"
 
-ai1 = TongYiOnline("qwen-turbo", TONGYI_API_KEY, 5,
-                   f'你是辩论机器人tongyi，今天你要讨论的主题是[{topic}]，'
-                   f'你的观点是[{ai1_topic}]，反方的观点是[{ai2_topic}]，'
-                   f'你的任务是在这场辩论赛中赢得胜利。',
-                   TTS("zh-CN-XiaoxiaoNeural", "tmp/ai1.mp3", "tmp/ai1.vtt"))
+ai_tongyi = TongYiOnline("qwen-turbo", TONGYI_API_KEY, 5,
+                         f'你是辩论机器人tongyi，今天你要讨论的主题是[{topic}]，'
+                         f'你的观点是[{ai1_topic}]，反方的观点是[{ai2_topic}]，'
+                         f'你的任务是在这场辩论赛中赢得胜利。',
+                         TTS("zh-CN-XiaoxiaoNeural", "tmp/ai1.mp3", "tmp/ai1.vtt"), 8001)
 
-ai2 = ChatGLM("chatglm3-6b", CHAT_GLM_SERVER_URL, 5,
-              f'你是辩论机器人glm，今天你要讨论的主题是[{topic}]，'
-              f'你的观点是[{ai2_topic}]，反方的观点是[{ai1_topic}]，'
-              f'你的任务是在这场辩论赛中赢得胜利。',
-              TTS("zh-CN-XiaoyiNeural", "tmp/ai2.mp3", "tmp/ai2.vtt"))
+ai_glm3 = ChatGLM("chatglm3-6b", CHAT_GLM_SERVER_URL, 5,
+                  f'你是辩论机器人glm，今天你要讨论的主题是[{topic}]，'
+                  f'你的观点是[{ai2_topic}]，反方的观点是[{ai1_topic}]，'
+                  f'你的任务是在这场辩论赛中赢得胜利。',
+                  TTS("zh-CN-XiaoyiNeural", "tmp/ai2.mp3", "tmp/ai2.vtt"), 8002)
 
 
 def question_and_answer(ai1, ai2):
@@ -44,10 +44,10 @@ def start():
     while True:
         if turn % 2 == 1:
             # ai1 提问，ai2 回答
-            question_and_answer(ai1, ai2)
+            question_and_answer(ai_tongyi, ai_glm3)
         else:
             # ai2 提问，ai1 回答
-            question_and_answer(ai2, ai1)
+            question_and_answer(ai_glm3, ai_tongyi)
         turn += 1
         # # 可以添加一些终止对话的条件，例如达到一定轮次或特定的结束信号
         # if turn > 100:

@@ -1,8 +1,42 @@
+import asyncio
 import time
 import os
 import subprocess
 
 import pygame
+
+from common.utils import parse_webvtt, calculate_duration
+from common.vts import vts_open_mouth
+
+
+async def play_voice(media_path):
+    await asyncio.sleep(1.2)
+    loop = asyncio.get_event_loop()
+
+    def play_sync():
+        print("开始播放声音")
+        pygame.mixer.init()
+        pygame.mixer.music.load(media_path)
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(1)
+        pygame.mixer.quit()
+
+    # 在事件循环的不同线程中运行Pygame的操作
+    await loop.run_in_executor(None, play_sync)
+
+
+async def open_mouth(vtt_path, vts_port):
+    print("开始变化嘴型")
+    subtitles = parse_webvtt(vtt_path)
+    total_duration = calculate_duration(subtitles)
+    await vts_open_mouth(vts_port, total_duration)
+
+
+async def play_voice_and_open_mouth(media_path, vtt_path, vts_port):
+    task2 = asyncio.create_task(open_mouth(vtt_path, vts_port))
+    task1 = asyncio.create_task(play_voice(media_path))
+    await asyncio.gather(task1, task2)
 
 
 class TTS:
@@ -11,7 +45,7 @@ class TTS:
         self.media_path = media_path
         self.vtt_path = vtt_path
 
-    def speak(self, text):
+    def speak(self, text, vts_port=None):
         if text is None:
             return
         text = text.replace("\n", "")
@@ -26,32 +60,10 @@ class TTS:
                   f'--write-subtitles {self.vtt_path} '
         command = command + f" --write-subtitles {self.vtt_path} "
         subprocess.run(command, shell=True)  # 执行命令行指令
-        pygame.mixer.init()
-        pygame.mixer.music.load(self.media_path)
-        pygame.mixer.music.play()
-        while pygame.mixer.music.get_busy():
-            pygame.time.Clock().tick(1)
-        pygame.mixer.quit()
-        time.sleep(0.2)
-
-    def speak_with_cache(self, text, media_path, vtt_path):
-        if text is None:
-            return
-        text = text.replace("\n", "")
-        if not os.path.exists(media_path) or not os.path.exists(vtt_path):
-            command = f'edge-tts --voice {self.voice} ' \
-                      f'--text "{text}" ' \
-                      f'--write-media {media_path} ' \
-                      f'--write-subtitles {vtt_path} '
-            subprocess.run(command, shell=True)  # 执行命令行指令
-        with open(vtt_path, 'r', encoding='utf-8') as file:
-            self.modify_vtt_file(file.read())
-        pygame.mixer.init()
-        pygame.mixer.music.load(media_path)
-        pygame.mixer.music.play()
-        while pygame.mixer.music.get_busy():
-            pygame.time.Clock().tick(1)
-        pygame.mixer.quit()
+        if vts_port is None:
+            asyncio.run(play_voice(self.media_path))
+        else:
+            asyncio.run(play_voice_and_open_mouth(self.media_path, self.vtt_path, vts_port))
         time.sleep(0.2)
 
     def modify_vtt_file(self, text):

@@ -1,19 +1,24 @@
+import asyncio
 from abc import abstractmethod
 
 from ai.utils import MultiRoundQuestionAnswer
+from common.vts import vts_authenticate
 
 
 class AiBasic:
 
-    def __init__(self, model, api_key, round_count, system_role, tts=None):
+    def __init__(self, model, api_key, round_count, system_role, tts=None, vts_port=None):
         self.model = model
         self.api_key = api_key
         self.mrqa = MultiRoundQuestionAnswer(round_count, system_role)
         print(
             f"TongYiOnline inited, model: {self.model}, round_count: {self.mrqa.round_count}, system_role: {self.mrqa.system_role}")
-        self.tts = tts
-        if self.tts is not None:
+        if tts is not None:
+            self.tts = tts
             self.tts.modify_vtt_file(f'WEBVTT\n00:00:00.100 --> 00:00:03.900\n...')
+        if vts_port is not None:
+            self.vts_port = vts_port
+            asyncio.run(vts_authenticate(vts_port))
 
     @abstractmethod
     def create_chat_completion(self, question):
@@ -28,12 +33,7 @@ class AiBasic:
     def speak(self, text):
         if self.tts is not None:
             self.activate_subtitle()
-            self.tts.speak(text)
-
-    def speak_with_cache(self, text, media_path, vtt_path):
-        if self.tts is not None:
-            self.activate_subtitle()
-            self.tts.speak_with_cache(text, media_path, vtt_path)
+            self.tts.speak(text, self.vts_port)
 
     def activate_subtitle(self):
         if self.tts is not None:
