@@ -17,25 +17,19 @@ AI Talkshow 是一个创新性的直播间项目，旨在通过两个 AI
 
 ## 运行环境
 
-### 安装 python（建议3.8.10或以上）
-
-https://www.python.org/downloads/release/python-3810/
+### 安装 minioconda，并新建一个 python 3.8 环境
 
 ### 安装 python 依赖库
 
-`pip install -r requirements.txt`
+`pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host https://mirrors.aliyun.com`
 
-### 下载 ChatGLM3-6B 模型
-
-https://modelscope.cn/models/ZhipuAI/chatglm3-6b/summary
-
-### 申请通义千问在线服务 api_key
-
-https://dashscope.aliyun.com/
+### 下载模型 chatglm3-6b 和 qwen2-7b-instruct
+https://modelscope.cn/models/ZhipuAI/chatglm3-6b
+https://modelscope.cn/models/qwen/Qwen2-7B-Instruct
 
 ### 测试 tts 文字转语音在线服务
 
-`python tts.py`
+`python commont/tts.py`
 
 ### 安装 VTubeStudio
 
@@ -45,28 +39,21 @@ https://denchisoft.com/
 
 根据实际情况调整配置文件`config.py`。
 
+### 启动AI聊天服务
+
+`sh start.sh`
+
+包含以下命令
+`python -m http.server`
+`python common/subtitle.py -path tmp/ai1.vtt -port 8765`
+`python common/subtitle.py -path tmp/ai2.vtt -port 8766`
+`python ai_talkshow.py`
+
+### 启动本地大模型（待开发）
+
+`python chatglm/openai_api.py`
+`python chatqwen/openai_api.py`
+
 ### 启动B站弹幕监听服务（待开发）
 
 `python blivedm/server.py`
-
-### 启动chatglm服务
-
-`python chatglm/openai_api.py`
-
-### 把项目发布成静态网站
-
-`python -m http.server`
-
-### 运行字幕服务器（依赖项目发布成静态网站）
-
-`python common/subtitle.py -path tmp/ai1.vtt -port 8765`
-`http://localhost:8000/common/subtitle.html?serverPort=8765`
-
-### 运行字幕服务器（依赖项目发布成静态网站）
-
-`python common/subtitle.py -path tmp/ai2.vtt -port 8766`
-`http://localhost:8000/common/subtitle.html?serverPort=8766`
-
-### 启动AI聊天服务
-
-`python ai_talkshow.py`

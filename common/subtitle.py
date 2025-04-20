@@ -58,22 +58,22 @@ class SubtitleFileHandler(FileSystemEventHandler):
             if self.last_file_content != cur_file_content:
                 print('on_modified update...')
                 self.last_file_content = cur_file_content
-                asyncio.run(update_websocket_data(self.websocket, self.file_path))
+                asyncio.run(update_subtitle_textbox(self.websocket, self.file_path))
             else:
                 print('on_modified no update...')
             print('on_modified end...')
             print('\n')
 
 
-async def update_websocket_data(websocket, file_path):
-    print('update_websocket_data start...')
+async def update_subtitle_textbox(websocket, file_path):
+    print('update_subtitle_textbox start...')
     with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
         if len(lines) <= 0:
             return
         first_line = lines[0]
         print('first_line:' + first_line)
-        if re.match(r'WEBVTT', first_line):
+        if re.match(r'1', first_line):
             print('update_subtitle start...')
             subtitles = await parse_subtitle(file_path)
             print('update_subtitle ' + str(subtitles))
@@ -95,19 +95,21 @@ async def parse_subtitle(file_path):
         if len(lines) <= 0:
             return subtitles
         first_line = lines[0].strip()
-        if not re.match(r'WEBVTT', first_line):
+        if not re.match(r'1', first_line):
             return subtitles
         cue = None
         for line in lines:
             line = line.strip()
-            if line and not line.startswith('WEBVTT'):
-                if re.match(r'\d+:\d+:\d+\.\d+ --> \d+:\d+:\d+\.\d+', line):
-                    if cue:
-                        subtitles.append(cue)
-                    cue = {'start': line.split(' --> ')[0], 'text': ''}
-                else:
-                    if cue is not None:
-                        cue['text'] += line + ' '
+            # 判断字符串转数字，
+            if re.match(r'^\d+$', line):
+                continue
+            if re.match(r'\d+:\d+:\d+,\d+ --> \d+:\d+:\d+,\d+', line):
+                if cue:
+                    subtitles.append(cue)
+                cue = {'start': line.split(' --> ')[0], 'text': ''}
+            else:
+                if cue is not None:
+                    cue['text'] += line + ' '
         if cue:
             subtitles.append(cue)
     return subtitles
@@ -154,3 +156,11 @@ if __name__ == "__main__":
     service = Subtitle(path, port)
     service.start()
     print('Server started...path:' + path + 'port:' + str(port))
+
+# # python common/subtitle.py -path tmp/ai2.vtt -port 8766
+# if __name__ == "__main__":
+#     path = "D:\\stone\\code\\stone0090\\ai-talkshow\\tmp\\ai1.vtt"
+#     port = 8766
+#     service = Subtitle(path, port)
+#     service.start()
+#     print('Server started...path:' + path + 'port:' + str(port))

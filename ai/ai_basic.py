@@ -11,13 +11,13 @@ class AiBasic:
         self.model = model
         self.api_key = api_key
         self.mrqa = MultiRoundQuestionAnswer(round_count, system_role)
+        self.tts = tts
+        self.vts_port = vts_port
         print(
             f"TongYiOnline inited, model: {self.model}, round_count: {self.mrqa.round_count}, system_role: {self.mrqa.system_role}")
-        if tts is not None:
-            self.tts = tts
-            self.tts.modify_vtt_file(f'WEBVTT\n00:00:00.100 --> 00:00:03.900\n...')
-        if vts_port is not None:
-            self.vts_port = vts_port
+        if self.tts is not None:
+            self.tts.modify_vtt_file(f'1\n00:00:00.100 --> 00:00:03.900\n...')
+        if self.vts_port is not None:
             asyncio.run(vts_authenticate(vts_port))
 
     @abstractmethod
@@ -46,4 +46,4 @@ class AiBasic:
     def send_subtitle(self, message):
         if self.tts is not None:
             self.activate_subtitle()
-            self.tts.modify_vtt_file(f'WEBVTT\n00:00:00.100 --> 00:00:03.900\n{message}')
+            self.tts.modify_vtt_file(f'1\n00:00:00.100 --> 00:00:03.900\n{message}')
