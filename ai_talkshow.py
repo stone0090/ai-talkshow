@@ -5,7 +5,7 @@ from common.tts import TTS
 
 topic = "考公是应届生最好的选择吗？"
 ai1_topic = "考公是应届生最好的选择！"
-ai2_topic = "考公不是应届生最好的选择！"
+ai2_topic = "考公并不是应届生最好的选择！"
 
 ai1 = QwenOnline(model="qwen-plus-0112",
                  api_key=TONGYI_API_KEY,
