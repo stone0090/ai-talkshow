@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "ai_talkshow.py", line 1, in <module>
+    from _old.ai.qwen_online import QwenOnline
+ModuleNotFoundError: No module named '_old'

@@ -1,59 +1,110 @@
-# AI Talkshow
+# AI TalkShow
 
-## 项目简介
+一个基于AI的直播间项目，支持单个AI或多个AI实时通过弹幕进行互动交流。
 
-AI Talkshow 是一个创新性的直播间项目，旨在通过两个 AI
-聊天进行实时对话，为观众提供独特而有趣的体验。这个项目结合了人工智能和实时互动，展示了机器之间的交流和讨论，同时也探索了人工智能领域的新可能性。
+![](demo.png)
 
-## 功能特性
+## 功能特点
 
-- **实时对话：** 两个 AI 将在直播间进行实时对话，呈现出生动有趣的互动场面。
-- **观众互动：** 观众可以通过聊天室与 AI 进行互动，提出问题或建议。
-- **开放源代码：** 项目代码完全开放，欢迎开发者贡献和提出改进建议。
+- 支持多个AI模型（ChatGLM、通义千问等）
+- 实时语音合成
+- 自动字幕生成
 
-## 效果演示
+## 系统要求
 
-![](ai_talkshow_demo.png)
+- Python 3.8+
+- 支持CUDA的GPU（推荐）
+- 足够的磁盘空间用于模型缓存
 
-## 运行环境
+## 安装
 
-### 安装 minioconda，并新建一个 python 3.8 环境
+1. 克隆仓库：
+```bash
+git clone https://github.com/yourusername/ai-talkshow.git
+cd ai-talkshow
+```
 
-### 安装 python 依赖库
+2. 安装依赖：
+```bash
+pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host https://mirrors.aliyun.com
+```
 
-`pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host https://mirrors.aliyun.com`
+3. 配置环境变量：
+```bash
+export QWEN_API_KEY="your-api-key"
+export QWEN_API_KEY=""
+export BILIBILI_SESSION="your-session"  # 可选
+```
 
-### 下载模型 chatglm3-6b 和 qwen2-7b-instruct
-https://modelscope.cn/models/ZhipuAI/chatglm3-6b
-https://modelscope.cn/models/qwen/Qwen2-7B-Instruct
+## 配置
 
-### 测试 tts 文字转语音在线服务
+编辑 `config/config.yaml` 文件进行配置：
 
-`python commont/tts.py`
+```yaml
+bilibili:
+  live_room_ids: [23679394]
+  session: ""  # 从环境变量BILIBILI_SESSION获取
 
-### 安装 VTubeStudio
+models:
+  chatglm:
+    model_path: "path/to/chatglm/model"
+    server:
+      host: "127.0.0.1"
+      port: 8000
+  qwen:
+    api_key: ""  # 从环境变量 QWEN_API_KEY 获取
+    model: "qwen-plus-0112"
 
-https://denchisoft.com/
+tts:
+  voices:
+    ai1: "zh-CN-XiaoxiaoNeural"
+    ai2: "zh-CN-XiaoyiNeural"
+  media_path: "tmp"
+  vtt_path: "tmp"
 
-## 运行项目
+debate:
+  max_turns: 5
+  topics:
+    main: "考公是应届生最好的选择吗？"
+    ai1: "考公是应届生最好的选择！"
+    ai2: "考公并不是应届生最好的选择！"
+```
 
-根据实际情况调整配置文件`config.py`。
+## 使用方法
 
-### 启动AI聊天服务
+1. 启动程序：
+```bash
+./scripts/start.sh
+```
 
-`sh start.sh`
+2. 停止程序：
+```bash
+./scripts/stop.sh
+```
 
-包含以下命令
-`python -m http.server`
-`python common/subtitle.py -path tmp/ai1.vtt -port 8765`
-`python common/subtitle.py -path tmp/ai2.vtt -port 8766`
-`python ai_talkshow.py`
+## 项目结构
 
-### 启动本地大模型（待开发）
+```
+ai-talkshow/
+├── src/
+│   ├── core/                 # 核心功能模块
+│   ├── models/              # AI模型实现
+│   ├── services/            # 服务层
+│   └── utils/               # 工具类
+├── config/                  # 配置文件
+├── tests/                   # 测试目录
+├── scripts/                 # 脚本目录
+└── requirements.txt         # 项目依赖
+```
 
-`python chatglm/openai_api.py`
-`python chatqwen/openai_api.py`
+## 开发计划
 
-### 启动B站弹幕监听服务（待开发）
+- [ ] 支持B站字幕互动
 
-`python blivedm/server.py`
+## 贡献
+
+欢迎提交Issue和Pull Request！
+
+## 许可证
+
+MIT License

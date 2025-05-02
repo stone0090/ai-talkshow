@@ -1,0 +1,33 @@
+logging:
+  level: "INFO"
+  file: "log/ai_talkshow.log"
+  max_size: 10485760  # 10MB
+  backup_count: 5
+
+bilibili:
+  live_room_ids: [23679394]
+  session: ""  # 从环境变量BILIBILI_SESSION获取
+
+tts:
+  voices:
+    ai1: "zh-CN-XiaoxiaoNeural"
+    ai2: "zh-CN-XiaoyiNeural"
+  media_path: "tmp"
+  vtt_path: "tmp"
+
+models:
+  chatglm:
+    model_path: "C:/Users/stone/.cache/modelscope/hub/ZhipuAI/chatglm3-6b"
+    server:
+      host: "127.0.0.1"
+      port: 8000
+  qwen:
+    api_key: ""  # 从环境变量 QWEN_API_KEY 获取
+    model: "qwen-plus-0112"
+
+debate:
+  max_turns: 5
+  topics:
+    main: "考公是应届生最好的选择吗？"
+    ai1: "考公是应届生最好的选择！"
+    ai2: "考公并不是应届生最好的选择！"
