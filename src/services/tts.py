@@ -1,23 +1,22 @@
 import os
+import asyncio
+import os
+import subprocess
+import pygame
 from typing import Optional, Tuple
-from src.utils.logger import get_logger
+from src.utils.logger import logger_manager
 
 class TTSService:
-    def __init__(self, config: dict):
-        self.config = config
-        self.logger = get_logger("tts_service")
-        self.media_path = config.get("tts.media_path", "tmp")
-        self.vtt_path = config.get("tts.vtt_path", "tmp")
+    def __init__(self, name: str, voice: str):
+        self.logger = logger_manager.get_logger(f"tts_service.{name}")
+        self.name = name
+        self.voice = voice
+        self.tmp_path = "tmp"
+        self.output_prefix = name
+        # self.output_prefix = f"{name}_{os.urandom(4).hex()}"
         self._ensure_directories()
-    
-    def _ensure_directories(self) -> None:
-        """确保必要的目录存在"""
-        for path in [self.media_path, self.vtt_path]:
-            if not os.path.exists(path):
-                os.makedirs(path)
-                self.logger.info(f"Created directory: {path}")
-    
-    def synthesize(self, text: str, voice: str, output_prefix: str) -> Tuple[str, str]:
+
+    def synthesize(self, text: str) -> Tuple[str, str]:
         """
         合成语音并生成字幕
         
@@ -30,47 +29,51 @@ class TTSService:
             tuple: (音频文件路径, 字幕文件路径)
         """
         try:
-            # 生成音频文件路径
-            audio_path = os.path.join(self.media_path, f"{output_prefix}.mp3")
-            vtt_path = os.path.join(self.vtt_path, f"{output_prefix}.vtt")
-            
-            # TODO: 实现具体的TTS合成逻辑
-            # 这里需要根据实际的TTS服务实现具体的合成逻辑
-            
+            # 获取临时文件路径，清理临时文件
+            audio_path, vtt_path = self._get_tmp_file_path()
+            self._cleanup_tmp_file()
+
+            # 替换换行符，确保文本没有换行符，否则生成音频失败
+            text = text.replace("\n", "")
+
+            # 具体的TTS合成逻辑
+            command = f'edge-tts --voice {self.voice} ' \
+                      f'--text "{text}" ' \
+                      f'--write-media {audio_path} ' \
+                      f'--write-subtitles {vtt_path} '
+            self.logger.info(f"Running command: {command}")
+            subprocess.run(command, shell=True, check=True)
+
             self.logger.info(f"Generated audio: {audio_path}")
             self.logger.info(f"Generated subtitle: {vtt_path}")
             
             return audio_path, vtt_path
-            
         except Exception as e:
             self.logger.error(f"Error in TTS synthesis: {e}")
             raise
-    
-    def cleanup(self, prefix: Optional[str] = None) -> None:
-        """
-        清理生成的文件
-        
-        Args:
-            prefix: 要清理的文件前缀，如果为None则清理所有文件
-        """
+
+    def _ensure_directories(self) -> None:
+        """确保必要的目录存在"""
+        for path in [self.tmp_path]:
+            if not os.path.exists(path):
+                os.makedirs(path)
+                self.logger.info(f"Created directory: {path}")
+
+    def _get_tmp_file_path(self) -> Tuple[str, str]:
+        """获取临时文件路径"""
+        audio_path = os.path.join(self.tmp_path, f"{self.output_prefix}.mp3")
+        vtt_path = os.path.join(self.tmp_path, f"{self.output_prefix}.vtt")
+        return audio_path, vtt_path
+
+    def _cleanup_tmp_file(self) -> None:
+        """清理临时文件"""
         try:
-            if prefix:
-                files_to_remove = [
-                    os.path.join(self.media_path, f"{prefix}.mp3"),
-                    os.path.join(self.vtt_path, f"{prefix}.vtt")
-                ]
-            else:
-                files_to_remove = []
-                for path in [self.media_path, self.vtt_path]:
-                    for file in os.listdir(path):
-                        if file.endswith(('.mp3', '.vtt')):
-                            files_to_remove.append(os.path.join(path, file))
-            
-            for file in files_to_remove:
-                if os.path.exists(file):
-                    os.remove(file)
-                    self.logger.info(f"Removed file: {file}")
-                    
+            # 根据操作系统选择路径分隔符
+            audio_path, vtt_path = self._get_tmp_file_path()
+            if os.path.exists(audio_path):
+                os.remove(audio_path)
+            if os.path.exists(vtt_path):
+                os.remove(vtt_path)
         except Exception as e:
-            self.logger.error(f"Error in cleanup: {e}")
-            raise 
+            self.logger.error(f"Error in _init_audio_and_vtt_file: {e}")
+            raise

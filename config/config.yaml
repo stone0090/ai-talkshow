@@ -6,24 +6,19 @@ logging:
 
 bilibili:
   live_room_ids: [23679394]
-  session: ""  # 从环境变量BILIBILI_SESSION获取
-
-tts:
-  voices:
-    ai1: "zh-CN-XiaoxiaoNeural"
-    ai2: "zh-CN-XiaoyiNeural"
-  media_path: "tmp"
-  vtt_path: "tmp"
+  session: ""  # 从环境变量 BILIBILI_SESSION 获取
 
 models:
-  chatglm:
-    model_path: "C:/Users/stone/.cache/modelscope/hub/ZhipuAI/chatglm3-6b"
-    server:
-      host: "127.0.0.1"
-      port: 8000
-  qwen:
+  ai1:
+    type: "qwen"
     api_key: ""  # 从环境变量 QWEN_API_KEY 获取
     model: "qwen-plus-0112"
+    voice: "zh-CN-XiaoxiaoNeural"
+  ai2:
+    type: "qwen"
+    api_key: ""  # 从环境变量 QWEN_API_KEY 获取
+    model: "qwen-plus-0112"
+    voice: "zh-CN-XiaoyiNeural"
 
 debate:
   max_turns: 5

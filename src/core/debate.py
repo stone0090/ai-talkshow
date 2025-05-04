@@ -1,78 +1,107 @@
-from typing import Optional
+from typing import Optional, List, Tuple
 from src.core.ai_agent import AIAgent
 from src.utils.logger import logger_manager
 
 class DebateManager:
-    def __init__(self, ai1: AIAgent, ai2: AIAgent, config: dict):
+    def __init__(self, config: dict):
+        self.config = config
+        self.logger = logger_manager.get_logger(__name__)
+        
+        # 获取辩论配置
+        self.max_turns = config.get("max_turns", 5)
+        self.topics = config.get("topics", {})
+        
+        # 初始化AI代理
+        self.ai1: Optional[AIAgent] = None
+        self.ai2: Optional[AIAgent] = None
+        self.current_turn = 0
+        self.history: List[Tuple[str, str]] = []
+
+    def initialize_agents(self, ai1: AIAgent, ai2: AIAgent) -> None:
+        """初始化AI代理"""
         self.ai1 = ai1
         self.ai2 = ai2
-        self.config = config
-        # 使用日志管理器获取 logger
-        self.logger = logger_manager.get_logger("debate_manager")
-        self.current_turn = 0
-        self.max_turns = config.get("debate.max_turns", 5)
-        self.topic = config.get("debate.topics.main", "")
-        self.ai1_topic = config.get("debate.topics.ai1", "")
-        self.ai2_topic = config.get("debate.topics.ai2", "")
+        self.logger.info("AI agents initialized")
+
+    def start_debate(self) -> None:
+        """开始辩论"""
+        if not self.ai1 or not self.ai2:
+            raise ValueError("AI agents not initialized")
         
-        # 设置AI代理的系统提示
-        self.ai1_system_prompt = (
-            f"你是辩论机器人{ai1.name}，今天你要讨论的主题是[{self.topic}]，"
-            f"你支持的观点是[{self.ai1_topic}]，"
-            f"你反方的观点是[{self.ai2_topic}]，"
+        self.logger.info(f"Starting debate on topic: {self.topics.get('main', '')}")
+        self.current_turn = 0
+        self.history = []
+
+        self.logger.info("Debate started with opening statements")
+
+        # 生成开场白
+        opening1 = self.ai1.generate_response("请发表你的开场白", self._get_system_prompt(self.ai1))
+        opening2 = self.ai2.generate_response("请发表你的开场白", self._get_system_prompt(self.ai2))
+        
+        self.history.append(("ai1", opening1))
+        self.history.append(("ai2", opening2))
+
+    def next_turn(self) -> bool:
+        """进行下一轮辩论"""
+        if not self.ai1 or not self.ai2:
+            raise ValueError("AI agents not initialized")
+        
+        if self.current_turn >= self.max_turns:
+            self.logger.info("Debate reached maximum turns")
+            return False
+        
+        # 获取上一轮的内容
+        last_speaker, last_content = self.history[-1]
+        current_speaker = self.ai2 if last_speaker == "ai1" else self.ai1
+        
+        # 生成回复
+        response = current_speaker.generate_response(
+            f"请对以下观点进行反驳：{last_content}",
+            self._get_system_prompt(current_speaker)
+        )
+        
+        self.history.append(("ai2" if last_speaker == "ai1" else "ai1", response))
+        self.current_turn += 1
+        
+        self.logger.info(f"Completed turn {self.current_turn}")
+        return True
+
+    def _get_system_prompt(self, agent: AIAgent) -> str:
+        """获取系统提示"""
+        name = "ai1" if agent == self.ai1 else "ai2"
+        return (
+            f"你是辩论机器人{name}，今天你要讨论的主题是[{self.topics.get('main', '')}]，"
+            f"你支持的观点是[{self.topics.get(name, '')}]，"
+            f"你反方的观点是[{self.topics.get('ai2' if name == 'ai1' else 'ai1', '')}]，"
             "你的任务是在这场辩论赛中赢得胜利！"
         )
-        self.ai2_system_prompt = (
-            f"你是辩论机器人{ai2.name}，今天你要讨论的主题是[{self.topic}]，"
-            f"你支持的观点是[{self.ai2_topic}]，"
-            f"你反方的观点是[{self.ai1_topic}]，"
-            "你的任务是在这场辩论赛中赢得胜利！"
-        )
-    
-    def _execute_turn(self) -> None:
-        """执行一轮辩论"""
-        if self.current_turn % 2 == 0:
-            # AI1提问，AI2回答
-            self._question_and_answer(self.ai1, self.ai2, self.ai1_system_prompt, self.ai2_system_prompt)
-        else:
-            # AI2提问，AI1回答
-            self._question_and_answer(self.ai2, self.ai1, self.ai2_system_prompt, self.ai1_system_prompt)
-    
-    def _question_and_answer(
-        self,
-        questioner: AIAgent,
-        responder: AIAgent,
-        questioner_system_prompt: str,
-        responder_system_prompt: str
-    ) -> None:
-        """执行问答环节"""
-        try:
-            # 提问者生成问题
-            question_prompt = (
-                "请肯定自己的观点，并提出反驳对方辩友观点的问题。"
-                "如果没有历史回答记录，请直接根据当前辩题给出一个新问题。"
-                "无需询问我，请直接给出问题，字数不要超过100字。"
-            )
-            question = questioner.generate_response(question_prompt, questioner_system_prompt)
-            self.logger.info(f"{questioner.name} question: {question}")
-            questioner.speak(question)
-            
-            # 回答者生成回答
-            responder.deactivate()
-            answer_prompt = f"请回答[{question}]，字数不要超过100字。"
-            answer = responder.generate_response(answer_prompt, responder_system_prompt)
-            self.logger.info(f"{responder.name} answer: {answer}")
-            responder.speak(answer)
-            
-        except Exception as e:
-            self.logger.error(f"Error in question and answer: {e}")
-            raise
-    
+
+    def get_history(self) -> List[Tuple[str, str]]:
+        """获取辩论历史"""
+        return self.history
+
     def run_debate(self) -> None:
-        """运行整个辩论"""
-        self.logger.info(f"Starting debate on topic: {self.topic}")
-        while self.current_turn < self.max_turns:
-            self.logger.info(f"Starting turn {self.current_turn + 1}")
-            self._execute_turn()
-            self.current_turn += 1
-        self.logger.info("Debate completed")
+        """运行完整的辩论流程，包括语音播放"""
+        # 开始辩论
+        self.start_debate()
+        
+        # 播放开场白
+        for speaker, content in self.history:
+            if speaker == "ai1":
+                self.ai1.speak(content)
+            else:
+                self.ai2.speak(content)
+        
+        # 进行辩论
+        while self.next_turn():
+            # 获取最新一轮的对话
+            history = self.get_history()
+            last_speaker, last_content = history[-1]
+            
+            # 播放语音
+            if last_speaker == "ai1":
+                self.ai1.speak(last_content)
+            else:
+                self.ai2.speak(last_content)
+        
+        self.logger.info("Debate completed successfully")

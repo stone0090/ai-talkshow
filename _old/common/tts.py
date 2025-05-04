@@ -97,7 +97,7 @@ class TTS:
                   f'--text "{text}" ' \
                   f'--write-media {self.media_path} ' \
                   f'--write-subtitles {self.vtt_path} '
-
+        logging.info(f"执行命令: {command}")
         try:
             subprocess.run(command, shell=True, check=True)
         except subprocess.CalledProcessError as e:
@@ -128,34 +128,34 @@ if __name__ == "__main__":
     # 女声示例
     female_tts1 = TTS("zh-CN-XiaoxiaoNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
     female_tts1.speak("你好，请问有什么可以帮到您？")
-
-    female_tts2 = TTS("zh-CN-XiaoyiNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
-    female_tts2.speak("你好，请问有什么可以帮到您？")
-
-    female_tts3 = TTS("zh-CN-liaoning-XiaobeiNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
-    female_tts3.speak("你好，请问有什么可以帮到您？")
-
-    female_tts4 = TTS("zh-CN-shaanxi-XiaoniNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
-    female_tts4.speak("你好，请问有什么可以帮到您？")
-
-    female_tts5 = TTS("zh-TW-HsiaoChenNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
-    female_tts5.speak("你好，请问有什么可以帮到您？")
-
-    female_tts6 = TTS("zh-TW-HsiaoYuNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
-    female_tts6.speak("你好，请问有什么可以帮到您？")
-
-    # 男声示例
-    male_tts1 = TTS("zh-CN-YunjianNeural", "../tmp/ai2.mp3", "../tmp/ai2.vtt")
-    male_tts1.speak("你好，请问有什么可以帮到您？")
-
-    male_tts2 = TTS("zh-CN-YunxiNeural", "../tmp/ai2.mp3", "../tmp/ai2.vtt")
-    male_tts2.speak("你好，请问有什么可以帮到您？")
-
-    male_tts3 = TTS("zh-CN-YunxiaNeural", "../tmp/ai2.mp3", "../tmp/ai2.vtt")
-    male_tts3.speak("你好，请问有什么可以帮到您？")
-
-    male_tts4 = TTS("zh-CN-YunyangNeural", "../tmp/ai2.mp3", "../tmp/ai2.vtt")
-    male_tts4.speak("你好，请问有什么可以帮到您？")
-
-    male_tts5 = TTS("zh-TW-YunJheNeural", "../tmp/ai2.mp3", "../tmp/ai2.vtt")
-    male_tts5.speak("你好，请问有什么可以帮到您？")
+    #
+    # female_tts2 = TTS("zh-CN-XiaoyiNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
+    # female_tts2.speak("你好，请问有什么可以帮到您？")
+    #
+    # female_tts3 = TTS("zh-CN-liaoning-XiaobeiNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
+    # female_tts3.speak("你好，请问有什么可以帮到您？")
+    #
+    # female_tts4 = TTS("zh-CN-shaanxi-XiaoniNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
+    # female_tts4.speak("你好，请问有什么可以帮到您？")
+    #
+    # female_tts5 = TTS("zh-TW-HsiaoChenNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
+    # female_tts5.speak("你好，请问有什么可以帮到您？")
+    #
+    # female_tts6 = TTS("zh-TW-HsiaoYuNeural", "../tmp/ai1.mp3", "../tmp/ai1.vtt")
+    # female_tts6.speak("你好，请问有什么可以帮到您？")
+    #
+    # # 男声示例
+    # male_tts1 = TTS("zh-CN-YunjianNeural", "../tmp/ai2.mp3", "../tmp/ai2.vtt")
+    # male_tts1.speak("你好，请问有什么可以帮到您？")
+    #
+    # male_tts2 = TTS("zh-CN-YunxiNeural", "../tmp/ai2.mp3", "../tmp/ai2.vtt")
+    # male_tts2.speak("你好，请问有什么可以帮到您？")
+    #
+    # male_tts3 = TTS("zh-CN-YunxiaNeural", "../tmp/ai2.mp3", "../tmp/ai2.vtt")
+    # male_tts3.speak("你好，请问有什么可以帮到您？")
+    #
+    # male_tts4 = TTS("zh-CN-YunyangNeural", "../tmp/ai2.mp3", "../tmp/ai2.vtt")
+    # male_tts4.speak("你好，请问有什么可以帮到您？")
+    #
+    # male_tts5 = TTS("zh-TW-YunJheNeural", "../tmp/ai2.mp3", "../tmp/ai2.vtt")
+    # male_tts5.speak("你好，请问有什么可以帮到您？")
