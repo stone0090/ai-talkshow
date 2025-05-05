@@ -6,10 +6,12 @@ class DebateManager:
     def __init__(self, config: dict):
         self.config = config
         self.logger = logger_manager.get_logger(__name__)
+        self.logger.debug(f"Initializing debate manager with config: {config}")
         
         # 获取辩论配置
         self.max_turns = config.get("max_turns", 5)
         self.topics = config.get("topics", {})
+        self.logger.debug(f"Debate configuration: max_turns={self.max_turns}, topics={self.topics}")
         
         # 初始化AI代理
         self.ai1: Optional[AIAgent] = None
@@ -22,24 +24,37 @@ class DebateManager:
         self.ai1 = ai1
         self.ai2 = ai2
         self.logger.info("AI agents initialized")
+        self.logger.debug(f"AI1: {ai1.nickname}, AI2: {ai2.nickname}")
 
     def start_debate(self) -> None:
         """开始辩论"""
         if not self.ai1 or not self.ai2:
+            self.logger.error("AI agents not initialized")
             raise ValueError("AI agents not initialized")
         
         self.logger.info(f"Starting debate on topic: {self.topics.get('main', '')}")
         self.current_turn = 0
         self.history = []
+        self.logger.debug("Debate history initialized")
 
         self.logger.info("Debate started with opening statements")
+        self.logger.debug(f"AI1 stance: {self.topics.get('ai1', '')}")
+        self.logger.debug(f"AI2 stance: {self.topics.get('ai2', '')}")
 
         # 生成开场白
-        opening1 = self.ai1.generate_response("请发表你的开场白", self._get_system_prompt(self.ai1))
-        opening2 = self.ai2.generate_response("请发表你的开场白", self._get_system_prompt(self.ai2))
-        
-        self.history.append(("ai1", opening1))
-        self.history.append(("ai2", opening2))
+        try:
+            opening1 = self.ai1.generate_response("请发表你的开场白", self._get_system_prompt(self.ai1))
+            self.logger.debug(f"AI1 opening statement generated: {opening1[:100]}...")
+            
+            opening2 = self.ai2.generate_response("请发表你的开场白", self._get_system_prompt(self.ai2))
+            self.logger.debug(f"AI2 opening statement generated: {opening2[:100]}...")
+            
+            self.history.append(("ai1", opening1))
+            self.history.append(("ai2", opening2))
+            self.logger.debug("Opening statements added to history")
+        except Exception as e:
+            self.logger.error(f"Error generating opening statements: {str(e)}", exc_info=True)
+            raise
 
     def next_turn(self) -> bool:
         """进行下一轮辩论"""
@@ -68,11 +83,11 @@ class DebateManager:
 
     def _get_system_prompt(self, agent: AIAgent) -> str:
         """获取系统提示"""
-        name = "ai1" if agent == self.ai1 else "ai2"
+        agent_code = "ai1" if agent == self.ai1 else "ai2"
         return (
-            f"你是辩论机器人{name}，今天你要讨论的主题是[{self.topics.get('main', '')}]，"
-            f"你支持的观点是[{self.topics.get(name, '')}]，"
-            f"你反方的观点是[{self.topics.get('ai2' if name == 'ai1' else 'ai1', '')}]，"
+            f"你是辩论机器人{agent.get_nickname()}，今天要讨论的主题是[{self.topics.get('main', '')}]，"
+            f"你是{'正方辩友' if agent == self.ai1 else '反方辩友'}，"
+            f"你支持的观点是[{self.topics.get(agent_code, '')}]，"
             "你的任务是在这场辩论赛中赢得胜利！"
         )
 

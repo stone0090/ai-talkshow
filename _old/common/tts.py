@@ -11,11 +11,11 @@ from _old.common.vts import vts_open_mouth
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
-async def play_voice(media_path):
+async def play_voice(audio_path):
     """
     异步播放音频文件。
     
-    :param media_path: 音频文件的路径
+    :param audio_path: 音频文件的路径
     """
     loop = asyncio.get_event_loop()
 
@@ -27,7 +27,7 @@ async def play_voice(media_path):
         try:
             print("开始播放声音")
             pygame.mixer.init()
-            pygame.mixer.music.load(media_path)
+            pygame.mixer.music.load(audio_path)
             pygame.mixer.music.play()
             while pygame.mixer.music.get_busy():
                 pygame.time.Clock().tick(1)
@@ -50,15 +50,15 @@ async def open_mouth(vtt_path, vts_port):
     await vts_open_mouth(vts_port, total_duration)
 
 
-async def play_voice_and_open_mouth(media_path, vtt_path, vts_port):
+async def play_voice_and_open_mouth(audio_path, vtt_path, vts_port):
     """
     同时播放音频并调整嘴型。
     
-    :param media_path: 音频文件路径
+    :param audio_path: 音频文件路径
     :param vtt_path: 字幕文件路径
     :param vts_port: VTS 服务端口
     """
-    task1 = asyncio.create_task(play_voice(media_path))
+    task1 = asyncio.create_task(play_voice(audio_path))
     task2 = asyncio.create_task(open_mouth(vtt_path, vts_port))
     await asyncio.gather(task1, task2)
 
@@ -68,12 +68,12 @@ class TTS:
     文本转语音（TTS）类，用于生成语音文件并播放。
     
     :param voice: 语音类型
-    :param media_path: 生成的音频文件路径
+    :param audio_path: 生成的音频文件路径
     :param vtt_path: 生成的字幕文件路径
     """
-    def __init__(self, voice, media_path, vtt_path):
+    def __init__(self, voice, audio_path, vtt_path):
         self.voice = voice
-        self.media_path = media_path
+        self.audio_path = audio_path
         self.vtt_path = vtt_path
 
     def speak(self, text, vts_port=None):
@@ -87,15 +87,15 @@ class TTS:
             return
 
         text = text.replace("\n", "")
-        if os.path.exists(self.media_path):
-            os.remove(self.media_path)
+        if os.path.exists(self.audio_path):
+            os.remove(self.audio_path)
         if os.path.exists(self.vtt_path):
             with open(self.vtt_path, 'w', encoding='utf-8') as file:
                 file.truncate()
 
         command = f'edge-tts --voice {self.voice} ' \
                   f'--text "{text}" ' \
-                  f'--write-media {self.media_path} ' \
+                  f'--write-media {self.audio_path} ' \
                   f'--write-subtitles {self.vtt_path} '
         logging.info(f"执行命令: {command}")
         try:
@@ -107,9 +107,9 @@ class TTS:
         # 使用 asyncio.run 管理事件循环
         try:
             if vts_port is None:
-                asyncio.run(play_voice(self.media_path))
+                asyncio.run(play_voice(self.audio_path))
             else:
-                asyncio.run(play_voice_and_open_mouth(self.media_path, self.vtt_path, vts_port))
+                asyncio.run(play_voice_and_open_mouth(self.audio_path, self.vtt_path, vts_port))
         except Exception as e:
             logging.error(f"播放音频或调整嘴型时发生错误: {e}")
 

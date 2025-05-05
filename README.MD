@@ -59,7 +59,7 @@ tts:
   voices:
     ai1: "zh-CN-XiaoxiaoNeural"
     ai2: "zh-CN-XiaoyiNeural"
-  media_path: "tmp"
+  audio_path: "tmp"
   vtt_path: "tmp"
 
 debate:

@@ -10,7 +10,7 @@ ai1 = QwenOnline(model="qwen-plus-0112",
                  api_key=QWEN_API_KEY,
                  round_count=5,
                  system_role=f'你是辩论机器人ai1，今天你要讨论的主题是[{topic}]，你支持的观点是[{ai1_topic}]，你反方的观点是[{ai2_topic}]，你的任务是在这场辩论赛中赢得胜利！',
-                 tts=TTS(voice="zh-CN-XiaoxiaoNeural", media_path="tmp/ai1.mp3", vtt_path="tmp/ai1.vtt"),
+                 tts=TTS(voice="zh-CN-XiaoxiaoNeural", audio_path="tmp/ai1.mp3", vtt_path="tmp/ai1.vtt"),
                  #vts_port=8001)
                  )
 
@@ -18,7 +18,7 @@ ai2 = QwenOnline(model="qwen-plus-1220",
                  api_key=QWEN_API_KEY,
                  round_count=5,
                  system_role=f'你是辩论机器人ai2，今天你要讨论的主题是[{topic}]，你支持的观点是[{ai2_topic}]，你反方的观点是[{ai1_topic}]，你的任务是在这场辩论赛中赢得胜利！',
-                 tts=TTS(voice="zh-CN-XiaoyiNeural", media_path="tmp/ai2.mp3", vtt_path="tmp/ai2.vtt"),
+                 tts=TTS(voice="zh-CN-XiaoyiNeural", audio_path="tmp/ai2.mp3", vtt_path="tmp/ai2.vtt"),
                  #vts_port=8002)
                  )
 

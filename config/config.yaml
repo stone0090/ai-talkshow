@@ -1,5 +1,5 @@
 logging:
-  level: "INFO"
+  level: "DEBUG"
   file: "log/ai_talkshow.log"
   max_size: 10485760  # 10MB
   backup_count: 5
@@ -10,15 +10,22 @@ bilibili:
 
 models:
   ai1:
+    nickname: "小千"
     type: "qwen"
     api_key: ""  # 从环境变量 QWEN_API_KEY 获取
     model: "qwen-plus-0112"
+    max_history: 2
     voice: "zh-CN-XiaoxiaoNeural"
+    vts_port: "8010"
+
   ai2:
+    nickname: "小问"
     type: "qwen"
     api_key: ""  # 从环境变量 QWEN_API_KEY 获取
     model: "qwen-plus-0112"
+    max_history: 2
     voice: "zh-CN-XiaoyiNeural"
+    vts_port: "8020"
 
 debate:
   max_turns: 5
