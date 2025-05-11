@@ -14,7 +14,11 @@ class VTSService:
         self.token_path = f'tmp/vts_token_{port}.txt'
         self.tmp_path = "tmp"
         self._ensure_directories()
-        self.vts = None
+        self.vts = pyvts.vts(port=self.port, token_path=self.token_path)
+        self.vts.vts_request = vts_request.VTSRequest(
+            developer=f'stone',
+            plugin_name=f'pyvts_{self.port}'
+        )
 
     def _ensure_directories(self) -> None:
         """确保必要的目录存在"""
@@ -22,27 +26,19 @@ class VTSService:
             os.makedirs(self.tmp_path)
             self.logger.info(f"Created directory: {self.tmp_path}")
 
-    async def _initialize_vts(self) -> None:
-        """初始化VTS连接"""
-        self.vts = pyvts.vts(port=self.port, token_path=self.token_path)
-        self.vts.vts_request = vts_request.VTSRequest(
-            developer=f'stone_{self.port}',
-            plugin_name=f'pyvts_{self.port}'
-        )
-
-    async def authenticate(self) -> None:
+    async def _authenticate(self) -> None:
         """认证VTS服务"""
         try:
             self.logger.info(f'Authenticating VTS for port {self.port}')
-            await self._initialize_vts()
-            
-            authentic_token = await self.vts.read_token()
+            authentic_token = None
+            try:
+                authentic_token = await self.vts.read_token()
+            except Exception as e:
+                self.logger.error(f"Error reading token: {e}")
             if authentic_token is not None:
                 return
-
             if os.path.exists(self.token_path):
                 os.remove(self.token_path)
-
             await self.vts.connect()
             await self.vts.request_authenticate_token()
             await self.vts.write_token()
@@ -60,7 +56,9 @@ class VTSService:
         """
         try:
             self.logger.info(f'Opening mouth for {duration_ms} ms')
-            await self._initialize_vts()
+            if not os.path.exists(self.token_path):
+                await self._authenticate()
+
             await self.vts.connect()
             await self.vts.read_token()
             await self.vts.request_authenticate()
@@ -83,14 +81,9 @@ class VTSService:
 
 async def main():
     """测试函数"""
-    # 创建两个VTS服务实例
-    vts1 = VTSService("ai1", 8001)
-    vts2 = VTSService("ai1", 8002)
-
-    # 启动异步任务
+    vts1 = VTSService("ai1", 8003)
     task1 = asyncio.create_task(vts1.open_mouth(5000))
-    task2 = asyncio.create_task(vts2.open_mouth(5000))
-    await asyncio.gather(task1, task2)
+    await asyncio.gather(task1)
 
 if __name__ == "__main__":
     asyncio.run(main())

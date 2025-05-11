@@ -8,15 +8,31 @@ from datetime import datetime, timedelta
 from pyvts import vts_request
 
 
+async def authentication_token(vts_port):
+    print(f'vts_authenticate for {vts_port}')
+    token_path = f'tmp/vts_token_{vts_port}.txt'
+    myvts = pyvts.vts(port=vts_port, token_path=token_path)
+    myvts.vts_request = vts_request.VTSRequest(
+        developer=f'stone',
+        plugin_name=f'pyvts_{vts_port}'
+    )
+    result = myvts.vts_request.authentication_token()
+    print(result)
+
+
 async def vts_authenticate(vts_port):
     print(f'vts_authenticate for {vts_port}')
     token_path = f'tmp/vts_token_{vts_port}.txt'
     myvts = pyvts.vts(port=vts_port, token_path=token_path)
     myvts.vts_request = vts_request.VTSRequest(
-        developer=f'stone_{vts_port}',
+        developer=f'stone',
         plugin_name=f'pyvts_{vts_port}'
     )
-    authentic_token = await myvts.read_token()
+    authentic_token = None
+    try:
+        authentic_token = await myvts.read_token()
+    except Exception as e:
+        print(e)
     if authentic_token is not None:
         return
     if not os.path.exists('tmp'):
@@ -34,7 +50,7 @@ async def vts_open_mouth(vts_port, duration):
     token_path = f'tmp/vts_token_{vts_port}.txt'
     myvts = pyvts.vts(port=vts_port, token_path=token_path)
     myvts.vts_request = vts_request.VTSRequest(
-        developer=f'stone_{vts_port}',
+        developer=f'stone',
         plugin_name=f'pyvts_{vts_port}'
     )
     await myvts.connect()
@@ -52,9 +68,12 @@ async def vts_open_mouth(vts_port, duration):
 
 async def main():
     # 启动异步任务
-    task1 = asyncio.create_task(vts_open_mouth(8001, 5000))
+    # task1 = asyncio.create_task(vts_open_mouth(8001, 5000))
+    # task1 = asyncio.create_task(vts_authenticate(8002))
+    # await asyncio.gather(task1)
     task2 = asyncio.create_task(vts_open_mouth(8002, 5000))
-    await asyncio.gather(task1, task2)
+    await asyncio.gather(task2)
+
 
 
 if __name__ == "__main__":

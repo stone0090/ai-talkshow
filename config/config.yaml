@@ -15,8 +15,8 @@ models:
     api_key: ""  # 从环境变量 QWEN_API_KEY 获取
     model: "qwen-plus-0112"
     max_history: 2
-    voice: "zh-CN-XiaoxiaoNeural"
-    vts_port: "8010"
+    tts_voice: "zh-CN-XiaoxiaoNeural"
+    vts_port: "8001"
 
   ai2:
     nickname: "小问"
@@ -24,8 +24,8 @@ models:
     api_key: ""  # 从环境变量 QWEN_API_KEY 获取
     model: "qwen-plus-0112"
     max_history: 2
-    voice: "zh-CN-XiaoyiNeural"
-    vts_port: "8020"
+    tts_voice: "zh-CN-XiaoyiNeural"
+    vts_port: "8003"
 
 debate:
   max_turns: 5
