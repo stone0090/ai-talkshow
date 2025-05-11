@@ -24,3 +24,13 @@ async def play_voice(audio_path):
             pygame.mixer.quit()  # 确保资源释放
 
     await loop.run_in_executor(None, play_sync)
+
+
+
+def main():
+    audio_path = "tmp/ai1.mp3"
+    asyncio.run(play_voice(audio_path))
+
+
+if __name__ == "__main__":
+    main()

@@ -81,7 +81,10 @@ class VTSService:
 
 async def main():
     """测试函数"""
-    vts1 = VTSService("ai1", 8003)
+    vts1 = VTSService("ai1", 8001)
+    task1 = asyncio.create_task(vts1.open_mouth(5000))
+    await asyncio.gather(task1)
+    await asyncio.sleep(3)
     task1 = asyncio.create_task(vts1.open_mouth(5000))
     await asyncio.gather(task1)
 

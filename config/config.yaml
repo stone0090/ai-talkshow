@@ -25,7 +25,7 @@ models:
     model: "qwen-plus-0112"
     max_history: 2
     tts_voice: "zh-CN-XiaoyiNeural"
-    vts_port: "8003"
+    vts_port: "8002"
 
 debate:
   max_turns: 5
