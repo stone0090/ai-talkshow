@@ -28,7 +28,7 @@ class AIAgent(ABC):
         """生成回答"""
         pass
 
-    def speak(self, text: str) -> None:
+    async def speak(self, text: str) -> None:
         """语音合成和播放声音"""
         if not self.tts_voice or not self.tts_service:
             self.logger.debug("Voice not configured, skipping speech synthesis")
@@ -36,22 +36,17 @@ class AIAgent(ABC):
 
         try:
             self.logger.debug(f"Generating speech for text: {text[:10]}...")
-            audio_path, vtt_path = self.tts_service.synthesize(text=text)
+            audio_path, vtt_path = await self.tts_service.synthesize(text=text)
             self.logger.debug(f"Speech generated: audio={audio_path}, subtitle={vtt_path}")
 
-            self.logger.debug("Playing audio")
-            asyncio.run(play_voice(audio_path))
-            self.logger.debug("Audio playback completed")
-
-            if not self.vts_service or not self.vts_service.vts:
-                self.logger.debug("VTS not configured or not authenticated, skipping open mouth")
-                return
-
-            # 计算张嘴的持续时间
-            mouth_open_duration = calculate_mouth_open_duration(vtt_path)
-            self.logger.debug(f"Opening mouth for {mouth_open_duration} ms")
-            asyncio.run(self.vts_service.open_mouth(duration_ms=mouth_open_duration))
-
+            if self.vts_service is not None and self.vts_service.vts is not None:
+                await self.vts_service.authenticate()
+                await asyncio.gather(
+                    play_voice(audio_path),
+                    self.vts_service.open_mouth(calculate_mouth_open_duration(vtt_path))
+                )
+            else:
+                await play_voice(audio_path)
             return
         except Exception as e:
             self.logger.error(f"Error in speech implementation: {str(e)}", exc_info=True)

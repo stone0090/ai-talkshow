@@ -1,5 +1,8 @@
 import asyncio
 import pygame
+from src.utils.logger import logger_manager
+
+logger = logger_manager.get_logger(f"audio_player")
 
 async def play_voice(audio_path):
     """
@@ -7,6 +10,7 @@ async def play_voice(audio_path):
 
     :param audio_path: 音频文件的路径
     """
+    logger.info(f"[{audio_path}] playing audio...")
     loop = asyncio.get_event_loop()
 
     def play_sync():
@@ -23,6 +27,7 @@ async def play_voice(audio_path):
         finally:
             pygame.mixer.quit()  # 确保资源释放
 
+    logger.info("[{audio_path}] audio playback completed...")
     await loop.run_in_executor(None, play_sync)
 
 

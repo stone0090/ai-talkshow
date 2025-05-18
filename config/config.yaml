@@ -17,7 +17,6 @@ models:
     max_history: 2
     tts_voice: "zh-CN-XiaoxiaoNeural"
     vts_port: "8001"
-
   ai2:
     nickname: "小问"
     type: "qwen"

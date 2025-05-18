@@ -18,12 +18,8 @@ def calculate_mouth_open_duration(vtt_path: str) -> int:
         # 尝试解析 JSON 数据
         try:
             lines = content.strip().split('\n')
-            total_duration = sum(
-                json.loads(line).get('duration', 0)
-                for line in lines
-                if line.startswith('{"type": "WordBoundary"')
-            )
-            return int(total_duration / 10000)
+            row = json.loads(lines[-1])
+            return (row.get('offset', 0) + row.get('duration', 0)) / 10000
         except json.JSONDecodeError:
             logger.warning("Failed to parse VTT file as JSON. Falling back to old format.")
 

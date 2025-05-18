@@ -1,3 +1,4 @@
+import asyncio
 import os
 import json
 import dashscope
@@ -78,3 +79,33 @@ class QwenAgent(AIAgent):
                 response.request_id, response.status_code, response.code, response.message
             ))
             raise Exception(f"API request failed: {response.message}")
+
+
+async def main():
+    ai1_config = {
+        "nickname": "小千",
+        "type": "qwen",
+        "api_key": "",
+        "model": "qwen-plus-0112",
+        "max_history": 2,
+        "tts_voice": "zh-CN-XiaoxiaoNeural",
+        "vts_port": "8001"
+    }
+    ai1 = QwenAgent("ai1", ai1_config)
+    await ai1.speak("你好，我是小千，很高兴认识你！")
+
+    ai2_config = {
+        "nickname": "小问",
+        "type": "qwen",
+        "api_key": "",
+        "model": "qwen-plus-0112",
+        "max_history": 2,
+        "tts_voice": "zh-CN-XiaoyiNeural",
+        "vts_port": "8002"
+    }
+    ai2 = QwenAgent("ai1", ai2_config)
+    await ai2.speak("你好，我是小问，今天我们来讨论一个有趣的话题。")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

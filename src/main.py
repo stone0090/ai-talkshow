@@ -1,3 +1,4 @@
+import asyncio
 import os
 import yaml
 from src.core.debate import DebateManager
@@ -49,7 +50,7 @@ def main():
         
         # 开始辩论
         logger.info("Starting debate session")
-        debate_manager.run_debate()
+        asyncio.run(debate_manager.run_debate())
         logger.info("Debate session completed")
         
     except Exception as e:

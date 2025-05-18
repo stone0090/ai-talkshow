@@ -105,6 +105,7 @@ async def main():
     vts1 = VTSService("ai1", 8001)
     test_text1 = "你好，我是小千，很高兴认识你！"
     audio_path1, vtt_path1 = await tts1.synthesize(test_text1)
+    await vts1.authenticate()
     print(f"ai1 生成结果:")
     print(f"音频文件: {audio_path1}")
     print(f"字幕文件: {vtt_path1}")
@@ -119,6 +120,7 @@ async def main():
     vts2 = VTSService("ai2", 8002)
     test_text2 = "你好，我是小问，今天我们来讨论一个有趣的话题。"
     audio_path2, vtt_path2 = await tts2.synthesize(test_text2)
+    await vts2.authenticate()
     print(f"ai2 生成结果:")
     print(f"音频文件: {audio_path2}")
     print(f"字幕文件: {vtt_path2}")

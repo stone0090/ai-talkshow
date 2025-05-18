@@ -95,7 +95,7 @@ class DebateManager:
         """获取辩论历史"""
         return self.history
 
-    def run_debate(self) -> None:
+    async def run_debate(self) -> None:
         """运行完整的辩论流程，包括语音播放"""
         # 开始辩论
         self.start_debate()
@@ -103,9 +103,9 @@ class DebateManager:
         # 播放开场白
         for speaker, content in self.history:
             if speaker == "ai1":
-                self.ai1.speak(content)
+                await self.ai1.speak(content)
             else:
-                self.ai2.speak(content)
+                await self.ai2.speak(content)
         
         # 进行辩论
         while self.next_turn():
@@ -115,8 +115,8 @@ class DebateManager:
             
             # 播放语音
             if last_speaker == "ai1":
-                self.ai1.speak(last_content)
+                await self.ai1.speak(last_content)
             else:
-                self.ai2.speak(last_content)
+                await self.ai2.speak(last_content)
         
         self.logger.info("Debate completed successfully")
