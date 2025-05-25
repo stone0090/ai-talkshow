@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtitle Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: transparent;
+        }
+
+        .subtitle-container {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .online {
+            border: 2px solid #fbd1b8;
+            color: #2ecc71;
+        }
+
+        .offline {
+            border: 2px solid #b7b4b4;
+            color: #b7b4b4;
+        }
+
+        #subtitleContainer {
+            font-size: 24px;
+            line-height: 1.5;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="subtitleContainer" class="subtitle-container online"></div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const serverPort = urlParams.get('serverPort');
+        console.log('Server port:', serverPort);
+        const subtitleContainer = document.getElementById('subtitleContainer');
+        const socket = new WebSocket(`ws://localhost:${serverPort}`);
+        socket.onopen = function () {
+            socket.send('success');
+        };
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.text) {
+                subtitleContainer.innerText = data.text;
+            }
+            if (data.class) {
+                subtitleContainer.className = 'subtitle-container ' + data.class;
+            }
+        };
+        socket.onclose = function(event) {
+            if (event.wasClean) {
+                console.log(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
+            } else {
+                console.error('Connection died');
+                subtitleContainer.className = 'subtitle-container offline';
+            }
+        };
+        socket.onerror = function(error) {
+            console.error('WebSocket error:', error);
+            subtitleContainer.className = 'subtitle-container offline';
+        };
+    </script>
+</body>
+</html> 

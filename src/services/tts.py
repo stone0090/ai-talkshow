@@ -1,12 +1,11 @@
 import asyncio
+import pygame
 import os
 import edge_tts
 import json
 from typing import Optional, Tuple
 from src.utils.logger import logger_manager
 from src.services.vts import VTSService
-from src.services.audio_player import play_voice
-from src.services.subtitle import calculate_mouth_open_duration
 
 
 class TTSService:
@@ -17,6 +16,8 @@ class TTSService:
         self.tmp_path = "tmp"
         self.output_prefix = agent_code
         # self.output_prefix = f"{agent_code}_{os.urandom(4).hex()}"
+        self.audio_path = os.path.join(self.tmp_path, f"{self.output_prefix}.mp3")
+        self.vtt_path = os.path.join(self.tmp_path, f"{self.output_prefix}.vtt")
         self._ensure_directories()
 
     async def synthesize(self, text: str) -> Tuple[str, str]:
@@ -28,8 +29,7 @@ class TTSService:
         Returns:
             tuple: 包含音频文件路径和字幕文件路径的元组
         """
-        # 获取临时文件路径，清理临时文件
-        audio_path, vtt_path = self._get_tmp_file_path()
+        # 清理临时文件
         self._cleanup_tmp_file()
 
         try:
@@ -37,15 +37,15 @@ class TTSService:
 
             async def generate_audio_async() -> None:
                 communicate = edge_tts.Communicate(text, self.voice)
-                await communicate.save(audio_path, vtt_path)
+                await communicate.save(self.audio_path, self.vtt_path)
 
             await generate_audio_async()
-            self.logger.debug(f"Speech synthesis completed: audio saved to {audio_path}, subtitles saved to {vtt_path}")
+            self.logger.debug(f"Speech synthesis completed: audio saved to {self.audio_path}, subtitles saved to {self.vtt_path}")
 
             # 将 vtt 文件中的 text 字段转换为中文
-            self._convert_vtt_text_to_chinese(vtt_path)
+            self._convert_vtt_text_to_chinese(self.vtt_path)
 
-            return audio_path, vtt_path
+            return self.audio_path, self.vtt_path
         except Exception as e:
             self.logger.error(f"Error in TTS synthesis: {str(e)}", exc_info=True)
             raise
@@ -87,48 +87,68 @@ class TTSService:
     def _cleanup_tmp_file(self) -> None:
         """清理临时文件"""
         try:
-            # 根据操作系统选择路径分隔符
-            audio_path, vtt_path = self._get_tmp_file_path()
-            if os.path.exists(audio_path):
-                os.remove(audio_path)
-            if os.path.exists(vtt_path):
-                os.remove(vtt_path)
+            if os.path.exists(self.audio_path):
+                os.remove(self.audio_path)
+            if os.path.exists(self.vtt_path):
+                os.remove(self.vtt_path)
         except Exception as e:
             self.logger.error(f"Error in _init_audio_and_vtt_file: {e}")
             raise
 
+    async def play_voice(self, audio_path=None):
+        """
+        异步播放音频文件。
+
+        :param audio_path: 音频文件的路径
+        """
+        if not audio_path:
+            audio_path = self.audio_path;
+        self.logger.info(f"[{audio_path}] playing audio...")
+        loop = asyncio.get_event_loop()
+
+        def play_sync():
+            """
+            同步播放音频文件，使用 pygame 模块。
+            确保在播放完成后释放资源。
+            """
+            try:
+                pygame.mixer.init()
+                pygame.mixer.music.load(audio_path)
+                pygame.mixer.music.play()
+                while pygame.mixer.music.get_busy():
+                    pygame.time.Clock().tick(1)
+            finally:
+                pygame.mixer.quit()  # 确保资源释放
+
+        self.logger.info("[{audio_path}] audio playback completed...")
+        await loop.run_in_executor(None, play_sync)
+
 
 async def main():
     """测试函数"""
-    # 创建两个TTS服务实例，使用不同的语音
+
     tts1 = TTSService("ai1", "zh-CN-XiaoxiaoNeural")
     vts1 = VTSService("ai1", 8001)
     test_text1 = "你好，我是小千，很高兴认识你！"
     audio_path1, vtt_path1 = await tts1.synthesize(test_text1)
-    await vts1.authenticate()
     print(f"ai1 生成结果:")
     print(f"音频文件: {audio_path1}")
     print(f"字幕文件: {vtt_path1}")
-
-    # 修改这里：使用await代替嵌套的asyncio.run
     await asyncio.gather(
-        play_voice(audio_path1),
-        vts1.open_mouth(calculate_mouth_open_duration(vtt_path1))
+        tts1.play_voice(),
+        vts1.open_mouth_by_vtt(vtt_path1)
     )
 
     tts2 = TTSService("ai2", "zh-CN-XiaoyiNeural")
     vts2 = VTSService("ai2", 8002)
     test_text2 = "你好，我是小问，今天我们来讨论一个有趣的话题。"
     audio_path2, vtt_path2 = await tts2.synthesize(test_text2)
-    await vts2.authenticate()
     print(f"ai2 生成结果:")
     print(f"音频文件: {audio_path2}")
     print(f"字幕文件: {vtt_path2}")
-
-    # 修改这里：直接使用await
     await asyncio.gather(
-        play_voice(audio_path2),
-        vts2.open_mouth(calculate_mouth_open_duration(vtt_path2))
+        tts2.play_voice(),
+        vts2.open_mouth_by_vtt(vtt_path2)
     )
 
 

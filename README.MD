@@ -32,7 +32,6 @@ pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/ --tru
 3. 配置环境变量：
 ```bash
 export QWEN_API_KEY="your-api-key"
-export QWEN_API_KEY=""
 export BILIBILI_SESSION="your-session"  # 可选
 ```
 
@@ -40,35 +39,6 @@ export BILIBILI_SESSION="your-session"  # 可选
 
 编辑 `config/config.yaml` 文件进行配置：
 
-```yaml
-bilibili:
-  live_room_ids: [23679394]
-  session: ""  # 从环境变量BILIBILI_SESSION获取
-
-models:
-  chatglm:
-    model_path: "path/to/chatglm/model"
-    server:
-      host: "127.0.0.1"
-      port: 8000
-  qwen:
-    api_key: ""  # 从环境变量 QWEN_API_KEY 获取
-    model: "qwen-plus-0112"
-
-tts:
-  voices:
-    ai1: "zh-CN-XiaoxiaoNeural"
-    ai2: "zh-CN-XiaoyiNeural"
-  audio_path: "tmp"
-  vtt_path: "tmp"
-
-debate:
-  max_turns: 5
-  topics:
-    main: "考公是应届生最好的选择吗？"
-    ai1: "考公是应届生最好的选择！"
-    ai2: "考公并不是应届生最好的选择！"
-```
 
 ## 使用方法
 

@@ -3,8 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, List, Dict
 from src.services.tts import TTSService
 from src.services.vts import VTSService
-from src.services.audio_player import play_voice
-from src.services.subtitle import calculate_mouth_open_duration
+from src.services.vtt import VTTService
 from src.utils.logger import logger_manager
 from src.core.conversation import ConversationHistory
 
@@ -20,6 +19,8 @@ class AIAgent(ABC):
         self.tts_service = TTSService(agent_code, self.tts_voice) if self.tts_voice else None
         self.vts_port = config.get("vts_port", None)
         self.vts_service = VTSService(agent_code, self.vts_port) if self.vts_port else None
+        self.vtt_port = config.get("vtt_port", None)
+        self.vtt_service = VTTService(self.tts_service.vtt_path, self.vtt_port) if self.vtt_port else None
         self.conversation = ConversationHistory(self.max_history)
         self.logger.debug("AI agent initialized successfully")
 
@@ -42,11 +43,11 @@ class AIAgent(ABC):
             if self.vts_service is not None and self.vts_service.vts is not None:
                 await self.vts_service.authenticate()
                 await asyncio.gather(
-                    play_voice(audio_path),
-                    self.vts_service.open_mouth(calculate_mouth_open_duration(vtt_path))
+                    self.tts_service.play_voice(audio_path),
+                    self.vts_service.open_mouth_by_vtt(vtt_path)
                 )
             else:
-                await play_voice(audio_path)
+                await self.tts_service.play_voice(audio_path)
             return
         except Exception as e:
             self.logger.error(f"Error in speech implementation: {str(e)}", exc_info=True)
