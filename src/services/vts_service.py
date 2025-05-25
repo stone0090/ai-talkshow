@@ -3,8 +3,9 @@ import json
 import os
 import re
 import random
-from datetime import datetime, timedelta
 import pyvts
+
+from datetime import datetime, timedelta
 from pyvts import vts_request
 from src.utils.logger import logger_manager
 
@@ -15,8 +16,6 @@ class VTSService:
         self.agent_code = agent_code
         self.server_port = server_port
         self.token_path = f'tmp/vts_token_{server_port}.txt'
-        self.tmp_path = "tmp"
-        self._ensure_directories()
         self.is_authenticated = False
         self.vts = pyvts.vts(port=self.server_port, token_path=self.token_path)
         self.vts.vts_request = vts_request.VTSRequest(
@@ -24,11 +23,6 @@ class VTSService:
             plugin_name=f'pyvts_{self.server_port}'
         )
 
-    def _ensure_directories(self) -> None:
-        """确保必要的目录存在"""
-        if not os.path.exists(self.tmp_path):
-            os.makedirs(self.tmp_path)
-            self.logger.info(f"Created directory: {self.tmp_path}")
 
     async def authenticate(self) -> None:
         """认证VTS服务"""
@@ -62,7 +56,7 @@ class VTSService:
             self.is_authenticated = True
         except Exception as e:
             self.logger.error(f"Error in VTS authentication: {e}")
-            raise
+            self.vts = None
 
     async def open_mouth_by_vtt(self, vtt_path: str) -> None:
         duration_ms = self._calculate_mouth_open_duration(vtt_path)
@@ -78,7 +72,7 @@ class VTSService:
             self.logger.info(f'Opening mouth for {duration_ms} ms')
             await self.authenticate()
             start_time = datetime.now()
-            interval = timedelta(milliseconds=50)
+            interval = timedelta(milliseconds=100)
             duration = timedelta(milliseconds=duration_ms)
             while datetime.now() - start_time < duration:
                 await self.vts.request(self.vts.vts_request.requestSetParameterValue("MouthOpen", random.random()))
@@ -133,7 +127,6 @@ class VTSService:
 
 
 async def main():
-    """测试函数"""
     vts1 = VTSService("ai1", 8001)
     await vts1.authenticate()
     await vts1.open_mouth(5000)

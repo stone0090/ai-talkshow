@@ -1,25 +1,40 @@
 import asyncio
 import os
 import yaml
+import subprocess
 from src.core.debate import DebateManager
 from src.models.qwen import QwenAgent
 from src.utils.logger import logger_manager
 
 
 def load_config() -> dict:
-    """加载配置文件"""
     config_path = os.path.join(os.path.dirname(__file__), "..", "config", "config.yaml")
     with open(config_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
 def setup_logging(config: dict) -> None:
-    """设置日志"""
     logging_config = config.get("logging", {})
     # 设置全局日志配置
     logger_manager.set_config(logging_config)
     # 创建主logger
     logger_manager.setup_logger("ai_talkshow")
+
+
+def start_static_server(logger, static_server_config):
+    try:
+        port = static_server_config.get("port", {})
+        root = static_server_config.get("root", {})
+        process = subprocess.Popen(
+            ["python", "-m", "http.server", port, "--directory", root],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        logger.info(f"Static file server started successfully: http://localhost:{port}")
+        return process
+    except Exception as e:
+        logger.error(f"Error in start_static_server: {str(e)}")
+        return None
 
 
 async def main_async():
@@ -31,6 +46,12 @@ async def main_async():
     # 设置日志
     setup_logging(config)
     logger.debug("Logging system initialized")
+
+    # 启动静态文件服务器
+    static_server_config = config.get("static_server", {})
+    static_server = start_static_server(logger, static_server_config)
+    if not static_server:
+        logger.warning(f"static_server initializing failed!")
 
     try:
         # 初始化AI代理
@@ -59,6 +80,10 @@ async def main_async():
     except Exception as e:
         logger.error(f"Error in main: {str(e)}", exc_info=True)
         raise
+    finally:
+        if static_server:
+            static_server.terminate()
+            static_server.wait()
 
 
 def main():

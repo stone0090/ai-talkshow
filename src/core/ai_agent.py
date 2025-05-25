@@ -1,9 +1,9 @@
 import asyncio
 from abc import ABC, abstractmethod
 from typing import Optional, List, Dict
-from src.services.tts import TTSService
-from src.services.vts import VTSService
-from src.services.vtt import VTTService
+from src.services.tts_service import TTSService
+from src.services.vts_service import VTSService
+from src.services.vtt_service import VTTService
 from src.utils.logger import logger_manager
 from src.core.conversation import ConversationHistory
 
@@ -38,20 +38,38 @@ class AIAgent(ABC):
         try:
             self.logger.debug(f"Generating speech for text: {text[:10]}...")
             audio_path, vtt_path = await self.tts_service.synthesize(text=text)
-            self.logger.debug(f"Speech generated: audio={audio_path}, subtitle={vtt_path}")
 
             if self.vts_service is not None and self.vts_service.vts is not None:
                 await self.vts_service.authenticate()
-                await asyncio.gather(
-                    self.tts_service.play_voice(audio_path),
-                    self.vts_service.open_mouth_by_vtt(vtt_path)
-                )
+
+            if self.vts_service is not None and self.vts_service.vts is not None:
+                if self.vtt_service is not None:
+                    await asyncio.gather(
+                        self.tts_service.play_voice(audio_path),
+                        self.vts_service.open_mouth_by_vtt(vtt_path),
+                        self.vtt_service.send_subtitle_by_vtt(vtt_path)
+                    )
+                else:
+                    await asyncio.gather(
+                        self.tts_service.play_voice(audio_path),
+                        self.vts_service.open_mouth_by_vtt(vtt_path),
+                    )
             else:
-                await self.tts_service.play_voice(audio_path)
-            return
+                if self.vtt_service is not None:
+                    await asyncio.gather(
+                        self.tts_service.play_voice(audio_path),
+                        self.vtt_service.send_subtitle_by_vtt(vtt_path)
+                    )
+                else:
+                    await asyncio.gather(
+                        self.tts_service.play_voice(audio_path),
+                    )
         except Exception as e:
             self.logger.error(f"Error in speech implementation: {str(e)}", exc_info=True)
             raise
+
+    async def send_subtitle(self, text: str) -> None:
+        await self.vtt_service.send_subtitle_by_text(text)
 
     def get_nickname(self) -> str:
         """获取name"""

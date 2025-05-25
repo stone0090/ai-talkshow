@@ -48,7 +48,7 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const serverPort = urlParams.get('serverPort');
+        const serverPort = urlParams.get('server_port');
         console.log('Server port:', serverPort);
         const subtitleContainer = document.getElementById('subtitleContainer');
         const socket = new WebSocket(`ws://localhost:${serverPort}`);
@@ -78,4 +78,4 @@
         };
     </script>
 </body>
-</html> 
+</html>

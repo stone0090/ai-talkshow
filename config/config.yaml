@@ -8,6 +8,11 @@ bilibili:
   live_room_ids: [23679394]
   session: ""  # 从环境变量 BILIBILI_SESSION 获取
 
+static_server:
+  port: "8080"
+  root: "./static"
+#  root: "./src/static"
+
 models:
   ai1:
     nickname: "小千"

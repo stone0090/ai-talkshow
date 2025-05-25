@@ -89,7 +89,8 @@ async def main():
         "model": "qwen-plus-0112",
         "max_history": 2,
         "tts_voice": "zh-CN-XiaoxiaoNeural",
-        "vts_port": "8001"
+        "vts_port": "8001",
+        "vtt_port": "9001"
     }
     ai1 = QwenAgent("ai1", ai1_config)
     await ai1.speak("你好，我是小千，很高兴认识你！")
@@ -101,7 +102,8 @@ async def main():
         "model": "qwen-plus-0112",
         "max_history": 2,
         "tts_voice": "zh-CN-XiaoyiNeural",
-        "vts_port": "8002"
+        "vts_port": "8002",
+        "vtt_port": "9002"
     }
     ai2 = QwenAgent("ai1", ai2_config)
     await ai2.speak("你好，我是小问，今天我们来讨论一个有趣的话题。")

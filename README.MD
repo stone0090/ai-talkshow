@@ -37,7 +37,9 @@ export BILIBILI_SESSION="your-session"  # 可选
 
 ## 配置
 
-编辑 `config/config.yaml` 文件进行配置：
+编辑 `config/config.yaml` 文件进行配置。
+字幕服务1：http://localhost:8080/vtt_viewer.html?server_port=9001
+字幕服务2：http://localhost:8080/vtt_viewer.html?server_port=9002
 
 
 ## 使用方法

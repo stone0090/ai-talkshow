@@ -1,11 +1,11 @@
 import asyncio
+import edge_tts
 import pygame
 import os
-import edge_tts
 import json
+
 from typing import Optional, Tuple
 from src.utils.logger import logger_manager
-from src.services.vts import VTSService
 
 
 class TTSService:
@@ -40,7 +40,8 @@ class TTSService:
                 await communicate.save(self.audio_path, self.vtt_path)
 
             await generate_audio_async()
-            self.logger.debug(f"Speech synthesis completed: audio saved to {self.audio_path}, subtitles saved to {self.vtt_path}")
+            self.logger.debug(
+                f"Speech synthesis completed: audio saved to {self.audio_path}, subtitles saved to {self.vtt_path}")
 
             # 将 vtt 文件中的 text 字段转换为中文
             self._convert_vtt_text_to_chinese(self.vtt_path)
@@ -102,7 +103,7 @@ class TTSService:
         :param audio_path: 音频文件的路径
         """
         if not audio_path:
-            audio_path = self.audio_path;
+            audio_path = self.audio_path
         self.logger.info(f"[{audio_path}] playing audio...")
         loop = asyncio.get_event_loop()
 
@@ -118,38 +119,20 @@ class TTSService:
                 while pygame.mixer.music.get_busy():
                     pygame.time.Clock().tick(1)
             finally:
-                pygame.mixer.quit()  # 确保资源释放
+                pygame.mixer.quit()
 
-        self.logger.info("[{audio_path}] audio playback completed...")
+        self.logger.info(f"[{audio_path}] audio playback completed...")
         await loop.run_in_executor(None, play_sync)
 
 
 async def main():
-    """测试函数"""
-
     tts1 = TTSService("ai1", "zh-CN-XiaoxiaoNeural")
-    vts1 = VTSService("ai1", 8001)
     test_text1 = "你好，我是小千，很高兴认识你！"
     audio_path1, vtt_path1 = await tts1.synthesize(test_text1)
     print(f"ai1 生成结果:")
     print(f"音频文件: {audio_path1}")
     print(f"字幕文件: {vtt_path1}")
-    await asyncio.gather(
-        tts1.play_voice(),
-        vts1.open_mouth_by_vtt(vtt_path1)
-    )
-
-    tts2 = TTSService("ai2", "zh-CN-XiaoyiNeural")
-    vts2 = VTSService("ai2", 8002)
-    test_text2 = "你好，我是小问，今天我们来讨论一个有趣的话题。"
-    audio_path2, vtt_path2 = await tts2.synthesize(test_text2)
-    print(f"ai2 生成结果:")
-    print(f"音频文件: {audio_path2}")
-    print(f"字幕文件: {vtt_path2}")
-    await asyncio.gather(
-        tts2.play_voice(),
-        vts2.open_mouth_by_vtt(vtt_path2)
-    )
+    await asyncio.create_task(tts1.play_voice())
 
 
 if __name__ == "__main__":
