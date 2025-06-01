@@ -5,6 +5,7 @@ import subprocess
 from src.core.debate import DebateManager
 from src.models.qwen import QwenAgent
 from src.utils.logger import logger_manager
+from src.services.bilibili_service import BilibiliService
 
 
 def load_config() -> dict:
@@ -53,6 +54,11 @@ async def main_async():
     if not static_server:
         logger.warning(f"static_server initializing failed!")
 
+    # 初始化bilibili弹幕服务
+    bilibili_config = config.get("bilibili", {})
+    logger.debug(f"Initializing bilibili service with config: {bilibili_config}")
+    bilibili = BilibiliService(bilibili_config)
+
     try:
         # 初始化AI代理
         models_config = config.get("models", {})
@@ -69,12 +75,16 @@ async def main_async():
         # 初始化辩论管理器
         debate_config = config.get("debate", {})
         logger.debug(f"Initializing debate manager with config: {debate_config}")
-        debate_manager = DebateManager(debate_config)
+        debate_manager = DebateManager(debate_config, bilibili)
         debate_manager.initialize_agents(ai1, ai2)
 
         # 开始辩论
         logger.info("Starting debate session")
-        await debate_manager.run_debate()
+        # await debate_manager.run_debate()
+        await asyncio.gather(
+            bilibili.start(),
+            debate_manager.run_debate()
+        )
         logger.info("Debate session completed")
 
     except Exception as e:
@@ -84,6 +94,8 @@ async def main_async():
         if static_server:
             static_server.terminate()
             static_server.wait()
+        if bilibili:
+            await bilibili.stop()
 
 
 def main():

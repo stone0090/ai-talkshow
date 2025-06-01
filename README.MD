@@ -6,7 +6,7 @@
 
 ## 功能特点
 
-- 支持多个AI模型（ChatGLM、通义千问等）
+- 支持通义千问
 - 实时语音合成
 - 自动字幕生成
 
@@ -59,7 +59,7 @@ export BILIBILI_SESSION="your-session"  # 可选
 ```
 ai-talkshow/
 ├── src/
-│   ├── core/                 # 核心功能模块
+│   ├── core/                # 核心功能模块
 │   ├── models/              # AI模型实现
 │   ├── services/            # 服务层
 │   └── utils/               # 工具类

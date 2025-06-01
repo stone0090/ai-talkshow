@@ -1,14 +1,16 @@
+import asyncio
 from typing import Optional, List, Tuple
 from src.core.ai_agent import AIAgent
 from src.utils.logger import logger_manager
+from src.services.bilibili_service import BilibiliService
 
 
 class DebateManager:
-    def __init__(self, config: dict):
-        self.config = config
+    def __init__(self, config: dict, bilibili_service: BilibiliService):
         self.logger = logger_manager.get_logger(__name__)
         self.logger.debug(f"Initializing debate manager with config: {config}")
-
+        self.config = config
+        self.bilibili_service = bilibili_service
         # 获取辩论配置
         self.max_turns = config.get("max_turns", 5)
         self.topics = config.get("topics", {})
@@ -19,6 +21,12 @@ class DebateManager:
         self.ai2: Optional[AIAgent] = None
         self.current_turn = 0
         self.history: List[Tuple[str, str]] = []
+
+    async def generate_danmaku_response(self, username: str, message: str) -> Optional[str]:
+        """Generate response for danmaku message"""
+        prompt = f"用户 {username} 说: {message}"
+        system_prompt = f"你是一个直播间的AI助手。请对观众的弹幕做出简短、有趣的回应。保持对话的连贯性和趣味性。"
+        return self.generate_response(prompt, system_prompt)
 
     def initialize_agents(self, ai1: AIAgent, ai2: AIAgent) -> None:
         """初始化AI代理"""
@@ -70,6 +78,10 @@ class DebateManager:
         last_speaker, last_content = self.history[-1]
         current_speaker = self.ai2 if last_speaker == "ai1" else self.ai1
 
+        if self.bilibili_service:
+            danmaku_queue = self.bilibili_service.get_danmaku_queue()
+            self.logger.info(danmaku_queue)
+
         # 生成回复
         response = current_speaker.generate_response(
             f"请对以下观点进行反驳：{last_content}",
@@ -86,10 +98,11 @@ class DebateManager:
         """获取系统提示"""
         agent_code = "ai1" if agent == self.ai1 else "ai2"
         return (
-            f"你是辩论机器人{agent.get_nickname()}，今天要讨论的主题是[{self.topics.get('main', '')}]，"
+            f"今天要讨论的主题是[{self.topics.get('main', '')}]，"
             f"你是{'正方辩友' if agent == self.ai1 else '反方辩友'}，"
             f"你支持的观点是[{self.topics.get(agent_code, '')}]，"
-            "你的任务是在这场辩论赛中赢得胜利，每次回答不超过50字！"
+            f"你的任务是在这场辩论赛中赢得胜利！"
+            # f"每次回答不超过50字！"
         )
 
     def get_history(self) -> List[Tuple[str, str]]:

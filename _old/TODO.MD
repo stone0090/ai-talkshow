@@ -24,3 +24,5 @@
 - 比如针对我的持仓股票，全网搜寻最新的信息，给出操作建议
 - 百炼api用法升级create_chat_completion
 - python -m http.server 8000 --directory ./src/static
+- 直播间弹幕配置：https://blive.chat/help 
+- 从 https://data.bilibili.com/v2/log/web?content_type=pbrequest&logid=021434&disable_compression=true 接口中获取 SESSDATA

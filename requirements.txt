@@ -1,7 +1,7 @@
-aiohttp==3.8.6
-Brotli==1.0.9
+aiohttp~=3.9.0
+Brotli~=1.1.0
+yarl~=1.9.3
 pure-protobuf==3.0.0a5
-yarl==1.8.2
 pygame==2.5.2
 websockets==11.0.3
 watchdog==3.0.0

@@ -14,6 +14,7 @@ class AIAgent(ABC):
         self.agent_code = agent_code
         self.config = config
         self.nickname = config.get("nickname", agent_code)
+        self.system_role = config.get("system_role", agent_code)
         self.max_history = config.get("max_history", 3)
         self.tts_voice = config.get("tts_voice", None)
         self.tts_service = TTSService(agent_code, self.tts_voice) if self.tts_voice else None

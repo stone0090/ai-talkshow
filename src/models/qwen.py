@@ -15,11 +15,11 @@ class QwenAgent(AIAgent):
         super().__init__(agent_code, config)
         self.model = config.get("model", "qwen-plus-0112")
         self.api_key = os.getenv("QWEN_API_KEY", "")
-        # 设置系统角色
-        self.system_role = (
-            f"你是来自阿里云的大规模语言模型{self.model}，你叫通义千问，昵称是{self.nickname}，"
-            f"你能够回答问题、创作文字，还能表达观点、撰写代码等，你能帮助用户解决各种问题。"
-        )
+        if self.system_role is None or self.system_role == "":
+            self.system_role = (
+                f"你是来自阿里云的大规模语言模型{self.model}，你叫通义千问，昵称是{self.nickname}，"
+                f"你能够回答问题、创作文字，还能表达观点、撰写代码等，你能帮助用户解决各种问题。"
+            )
         self.audio_path = config.get("tts", {}).get("audio_path", "tmp")
         self.vtt_path = config.get("tts", {}).get("vtt_path", "tmp")
 
@@ -28,17 +28,17 @@ class QwenAgent(AIAgent):
         try:
             # 构建消息列表，包含系统提示、历史对话和当前问题
             messages = []
-            
+
             # 添加系统提示
             if system_prompt:
-                messages.append({"role": "system", "content": system_prompt})
+                messages.append({"role": "system", "content": self.system_role + "\n" + system_prompt})
             else:
                 messages.append({"role": "system", "content": self.system_role})
-            
+
             # 添加历史对话
             history = self.get_history()
             messages.extend(history)
-            
+
             # 添加当前问题
             messages.append({"role": "user", "content": prompt})
 
@@ -48,7 +48,7 @@ class QwenAgent(AIAgent):
             # 将问题和回答添加到历史记录
             self.add_to_history("user", prompt)
             self.add_to_history("assistant", response)
-            
+
             return response
         except Exception as e:
             self.logger.error(f"Error generating response: {e}")
